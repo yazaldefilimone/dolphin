@@ -6,6 +6,10 @@
   "repository": "git@github.com:yazaldefilimonepinto/dolphin.git",
   "author": "Yazalde Filimone <yazaldefilimon@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "test:lexer": "vitest ./lexer",
+    "test": "vitest "
+  },
   "devDependencies": {
     "@types/node": "^20.3.2",
     "typescript": "^5.1.6",
