@@ -1,0 +1,15 @@
+{
+  "name": "dolphin",
+  "version": "1.0.0",
+  "description": "The Dolphin Programming Language",
+  "main": "index.ts",
+  "repository": "git@github.com:yazaldefilimonepinto/dolphin.git",
+  "author": "Yazalde Filimone <yazaldefilimon@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.3.2",
+    "typescript": "^5.1.6",
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^0.32.2"
+  }
+}
