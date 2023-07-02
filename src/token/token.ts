@@ -26,3 +26,19 @@ export enum TokenType {
   FUNCTION = "FUNCTION",
   LET = "LET",
 }
+
+type keywordsType = {
+  [key: string]: TokenType;
+};
+export const keywords: keywordsType = {
+  fn: TokenType.FUNCTION,
+  let: TokenType.LET,
+};
+
+export function lookupIdentifier(identifier: string): TokenType {
+  let token = keywords[identifier];
+  if (token) {
+    return token;
+  }
+  return TokenType.IDENT;
+}
