@@ -95,9 +95,9 @@ export class Lexer {
   }
 
   private isLetter(character: string): boolean {
-    let first = "a" <= character && character <= "z";
-    let second = "A" <= character && character <= "Z";
-    return Boolean(first || second || character == "_");
+    let isCharLoweCase = "a" <= character && character <= "z";
+    let isCharUpperCase = "A" <= character && character <= "Z";
+    return Boolean(isCharLoweCase || isCharUpperCase || character === "_");
   }
 
   // others
