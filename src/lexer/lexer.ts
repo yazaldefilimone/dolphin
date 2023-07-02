@@ -1,4 +1,4 @@
-import { TokenType, Token } from "token/token";
+import { TokenType, Token, lookupIdentifier } from "token/token";
 
 export class Lexer {
   private input: string;
@@ -14,17 +14,8 @@ export class Lexer {
     this.readCharacter();
   }
 
-  readCharacter() {
-    if (this.readPosition >= this.input.length) {
-      this.currentCharacter = "";
-    } else {
-      this.currentCharacter = this.input[this.readPosition];
-    }
-    this.position = this.readPosition;
-    this.readPosition += 1;
-  }
-
-  public nextToken(): Token | void {
+  public nextToken(): Token {
+    this.skipWhiteSpace();
     switch (this.currentCharacter) {
       case "=":
         return this.createToken(TokenType.ASSIGN, "=");
@@ -45,12 +36,74 @@ export class Lexer {
       case "":
         return this.createToken(TokenType.EOF, "");
       default:
+        if (this.isLetter(this.currentCharacter)) {
+          let identifier = this.readIdentifier();
+          let type = lookupIdentifier(identifier);
+          const token = new Token(type, identifier);
+          return token;
+        }
+
+        if (this.isDigit(this.currentCharacter)) {
+          let type = TokenType.INT;
+          let identifier = this.readNumber();
+          const token = new Token(type, identifier);
+          return token;
+        }
+        return this.createToken(TokenType.ILLEGAL, this.currentCharacter);
     }
   }
-
+  // method / functions
   private createToken(type: TokenType, literal: string) {
     this.readCharacter();
     const token = new Token(type, literal);
     return token;
+  }
+
+  // reads
+  readCharacter() {
+    if (this.readPosition >= this.input.length) {
+      this.currentCharacter = "";
+    } else {
+      this.currentCharacter = this.input[this.readPosition];
+    }
+    this.position = this.readPosition;
+    this.readPosition += 1;
+  }
+
+  private readIdentifier(): string {
+    let currentPosition = this.position;
+    while (this.isLetter(this.currentCharacter)) {
+      this.readCharacter();
+    }
+    return this.input.substring(currentPosition, this.position);
+  }
+
+  private readNumber(): string {
+    let currentPosition = this.position;
+    while (this.isDigit(this.currentCharacter)) {
+      this.readCharacter();
+    }
+    return this.input.substring(currentPosition, this.position);
+  }
+  // validators
+  private isWhiteSpace = (char: string) => {
+    return Boolean(char == " " || char == "\t" || char == "\n" || char == "\r");
+  };
+
+  private isDigit(character: string): boolean {
+    return Boolean("0" <= character && character <= "9");
+  }
+
+  private isLetter(character: string): boolean {
+    let first = "a" <= character && character <= "z";
+    let second = "A" <= character && character <= "Z";
+    return Boolean(first || second || character == "_");
+  }
+
+  // others
+  private skipWhiteSpace() {
+    while (this.isWhiteSpace(this.currentCharacter)) {
+      this.readCharacter();
+    }
   }
 }
