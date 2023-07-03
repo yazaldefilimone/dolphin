@@ -13,6 +13,11 @@ describe("Lexer", () => {
     let result = add(five, ten);
     !-/*5;
     5 < 10 > 5;
+    if (5 < 10) {
+      return true;
+    } else {
+      return false;
+    }
 `;
     let tests = [
       new Token(TokenType.LET, "let"),
@@ -63,6 +68,23 @@ describe("Lexer", () => {
       new Token(TokenType.GT, ">"),
       new Token(TokenType.INT, "5"),
       new Token(TokenType.SEMICOLON, ";"),
+      new Token(TokenType.IF, "if"),
+      new Token(TokenType.LPAREN, "("),
+      new Token(TokenType.INT, "5"),
+      new Token(TokenType.LT, "<"),
+      new Token(TokenType.INT, "10"),
+      new Token(TokenType.RPAREN, ")"),
+      new Token(TokenType.LBRACE, "{"),
+      new Token(TokenType.RETURN, "return"),
+      new Token(TokenType.TRUE, "true"),
+      new Token(TokenType.SEMICOLON, ";"),
+      new Token(TokenType.RBRACE, "}"),
+      new Token(TokenType.ELSE, "else"),
+      new Token(TokenType.LBRACE, "{"),
+      new Token(TokenType.RETURN, "return"),
+      new Token(TokenType.FALSE, "false"),
+      new Token(TokenType.SEMICOLON, ";"),
+      new Token(TokenType.RBRACE, "}"),
       new Token(TokenType.EOF, ""),
     ];
 
