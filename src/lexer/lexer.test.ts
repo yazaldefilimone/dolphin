@@ -11,6 +11,8 @@ describe("Lexer", () => {
       x + y;
     };
     let result = add(five, ten);
+    !-/*5;
+    5 < 10 > 5;
 `;
     let tests = [
       new Token(TokenType.LET, "let"),
@@ -48,6 +50,18 @@ describe("Lexer", () => {
       new Token(TokenType.COMMA, ","),
       new Token(TokenType.IDENT, "ten"),
       new Token(TokenType.RPAREN, ")"),
+      new Token(TokenType.SEMICOLON, ";"),
+      new Token(TokenType.BANG, "!"),
+      new Token(TokenType.MINUS, "-"),
+      new Token(TokenType.SLASH, "/"),
+      new Token(TokenType.ASTERISK, "*"),
+      new Token(TokenType.INT, "5"),
+      new Token(TokenType.SEMICOLON, ";"),
+      new Token(TokenType.INT, "5"),
+      new Token(TokenType.LT, "<"),
+      new Token(TokenType.INT, "10"),
+      new Token(TokenType.GT, ">"),
+      new Token(TokenType.INT, "5"),
       new Token(TokenType.SEMICOLON, ";"),
       new Token(TokenType.EOF, ""),
     ];
