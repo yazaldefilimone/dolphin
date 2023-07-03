@@ -15,6 +15,10 @@ export enum TokenType {
   // Operators
   ASSIGN = "=",
   PLUS = "+",
+  MINUS = "-",
+  BANG = "!",
+  ASTERISK = "*",
+  SLASH = "/",
   // Delimiters
   COMMA = ",",
   SEMICOLON = ";",
@@ -25,6 +29,9 @@ export enum TokenType {
   // Keywords
   FUNCTION = "FUNCTION",
   LET = "LET",
+
+  LT = "<",
+  GT = ">",
 }
 
 type keywordsType = {
