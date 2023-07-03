@@ -29,6 +29,11 @@ export enum TokenType {
   // Keywords
   FUNCTION = "FUNCTION",
   LET = "LET",
+  TRUE = "TRUE",
+  FALSE = "FALSE",
+  IF = "IF",
+  ELSE = "ELSE",
+  RETURN = "RETURN",
 
   LT = "<",
   GT = ">",
@@ -40,6 +45,11 @@ type keywordsType = {
 export const keywords: keywordsType = {
   fn: TokenType.FUNCTION,
   let: TokenType.LET,
+  false: TokenType.FALSE,
+  true: TokenType.TRUE,
+  if: TokenType.IF,
+  else: TokenType.ELSE,
+  return: TokenType.RETURN,
 };
 
 export function lookupIdentifier(identifier: string): TokenType {
