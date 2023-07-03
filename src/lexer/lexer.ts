@@ -19,6 +19,20 @@ export class Lexer {
     switch (this.currentCharacter) {
       case "=":
         return this.createToken(TokenType.ASSIGN, "=");
+      case "+":
+        return this.createToken(TokenType.PLUS, "+");
+      case "-":
+        return this.createToken(TokenType.MINUS, "-");
+      case "!":
+        return this.createToken(TokenType.BANG, "!");
+      case "/":
+        return this.createToken(TokenType.SLASH, "/");
+      case "*":
+        return this.createToken(TokenType.ASTERISK, "*");
+      case "<":
+        return this.createToken(TokenType.LT, "<");
+      case ">":
+        return this.createToken(TokenType.GT, ">");
       case ";":
         return this.createToken(TokenType.SEMICOLON, ";");
       case "{":
