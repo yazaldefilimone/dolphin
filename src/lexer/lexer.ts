@@ -18,12 +18,32 @@ export class Lexer {
     this.skipWhiteSpace();
     switch (this.currentCharacter) {
       case "=":
+        const peekedAssignCharacter = this.peekCharacter();
+        let storeAssignAfterCharacter = this.currentCharacter;
+        if (peekedAssignCharacter == "=") {
+          this.readCharacter();
+          const token = this.createToken(
+            TokenType.EQ,
+            storeAssignAfterCharacter + this.currentCharacter
+          );
+          return token;
+        }
         return this.createToken(TokenType.ASSIGN, "=");
       case "+":
         return this.createToken(TokenType.PLUS, "+");
       case "-":
         return this.createToken(TokenType.MINUS, "-");
       case "!":
+        const peekedBangCharacter = this.peekCharacter();
+        let storeBangAfterCharacter = this.currentCharacter;
+        if (peekedBangCharacter == "=") {
+          this.readCharacter();
+          const token = this.createToken(
+            TokenType.NOT_EQ,
+            storeBangAfterCharacter + this.currentCharacter
+          );
+          return token;
+        }
         return this.createToken(TokenType.BANG, "!");
       case "/":
         return this.createToken(TokenType.SLASH, "/");
@@ -71,6 +91,14 @@ export class Lexer {
     this.readCharacter();
     const token = new Token(type, literal);
     return token;
+  }
+
+  private peekCharacter(): string {
+    if (this.readPosition >= this.input.length) {
+      return "";
+    } else {
+      return this.input[this.readPosition];
+    }
   }
 
   // reads
