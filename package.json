@@ -12,8 +12,12 @@
   },
   "devDependencies": {
     "@types/node": "^20.3.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.1.6",
     "vite-tsconfig-paths": "^4.2.0",
     "vitest": "^0.32.2"
+  },
+  "dependencies": {
+    "nodemon": "^2.0.22"
   }
 }
