@@ -37,6 +37,8 @@ export enum TokenType {
 
   LT = "<",
   GT = ">",
+  EQ = "==",
+  NOT_EQ = "!=",
 }
 
 type keywordsType = {
