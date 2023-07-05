@@ -16,7 +16,7 @@ export function startReadEvalPrintLoop() {
   });
 
   function repl() {
-    scanner.question("> ", (input) => {
+    scanner.question(">> ", (input) => {
       if (exits.includes(input)) return scanner.close();
       const lexer = new Lexer(input);
       let token = lexer.nextToken();
