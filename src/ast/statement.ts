@@ -1,5 +1,5 @@
-import { INode } from "ast/node";
+import { INode } from "ast/type";
 
 export interface IStatement extends INode {
-  statementNode(): string;
+  statementNode(): unknown;
 }
