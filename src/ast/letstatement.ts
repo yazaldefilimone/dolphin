@@ -1,18 +1,9 @@
 import { Token } from "token";
-import { IExpression } from "ast/expression";
+import { IExpression } from "ast/type";
+import { Identifier } from "./identifier";
 
-export interface ILetStatement {
+export class LetStatement {
   token: Token;
   name: Identifier;
   value: IExpression;
-}
-
-export class Identifier {
-  token: Token;
-  value: string;
-  expressionNode() {}
-
-  tokenLiteral() {
-    return this.token.literal;
-  }
 }
