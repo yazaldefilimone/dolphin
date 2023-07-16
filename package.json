@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "test:lexer": "vitest ./lexer",
-    "test": "vitest "
+    "test": "vitest ",
+    "dev": "nodemon "
   },
   "devDependencies": {
     "@types/node": "^20.3.2",
