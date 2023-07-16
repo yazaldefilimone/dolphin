@@ -1,124 +1,72 @@
+import { Identifier, LetStatement, parseResult } from "ast";
 import { Program } from "ast/program";
-import { VariableStatement } from "ast/variable-statement";
 import { Lexer } from "lexer";
 import { Token, TokenType } from "token";
 
 export class Parser {
   private lexer: Lexer;
-  currentToken: Token;
-  peekToken: Token;
+  private currentToken: Token;
+  private peekToken: Token;
   constructor(lexer: Lexer) {
     this.lexer = lexer;
-    this.advanceTokens();
-    this.advanceTokens();
+    this.nextToken();
+    this.nextToken();
   }
 
-  private advanceTokens() {
+  nextToken() {
     this.currentToken = this.peekToken;
     this.peekToken = this.lexer.nextToken();
   }
 
-  private parseProgram(): Program {
+  parseProgram(): Program {
     let program = new Program();
-    this.advanceTokens();
-
-    while (this.currentToken.type !== TokenType.EOF) {
-      let statement = null;
-      switch (this.currentToken.type) {
-        case TokenType.LET:
-          statement = this.parseLetStatement();
-          break;
-        case TokenType.RETURN:
-          statement = this.parseReturnStatement();
-          break;
-        case TokenType.IF:
-          statement = this.parseIfStatement();
-          break;
-      }
+    while (this.currentToken.type != TokenType.EOF) {
+      let statement = this.parseStatement();
 
       if (statement != null) {
         program.statements.push(statement);
       }
-      this.advanceTokens();
+      this.nextToken();
     }
 
     return program;
   }
-  //  --------- parseLetStatement ------------ //
-  private parseLetStatement(): any {
-    this.advanceTokens();
-    let identifier = this.parseIdentifier();
-    this.advanceTokens();
-    if (this.currentToken.type != TokenType.ASSIGN) {
-      this.parseError("no equal sign!");
+  parseStatement() {
+    switch (this.currentToken.type) {
+      case TokenType.LET:
+        return this.parseLetStatement();
+      default:
+        return null;
+    }
+  }
+  parseLetStatement(): parseResult<LetStatement> {
+    const letToken = new LetStatement(this.currentToken);
+    if (!this.expectPeek(TokenType.IDENT)) {
       return null;
     }
-
-    this.advanceTokens();
-    let value = this.parseExpression();
-
-    let variableStatement = new VariableStatement(this.currentToken);
-    variableStatement.identifier = identifier;
-    variableStatement.value = value;
-    return variableStatement;
-  }
-  //  --------- parseIdentifier ------------ //
-  private parseIdentifier() {
-    let identifier = this.newIdentifierASTNode();
-    identifier.token = this.currentToken;
-    return identifier;
-  }
-  //  --------- parseExpression ------------ //
-  private parseExpression() {
-    if (this.currentToken.type == TokenType.IDENT) {
-      if (this.peekToken.type == TokenType.PLUS) {
-        return this.parseOperatorExpression();
-      }
-      if (this.peekToken.type == TokenType.SEMICOLON) {
-        return this.parseIntegerLiteral();
-      }
+    let identifier = new Identifier(this.currentToken);
+    letToken.name = identifier;
+    if (!this.peekTokenIs(TokenType.ASSIGN)) {
+      return null;
     }
-
-    if (this.currentToken.type == TokenType.LPAREN) {
-      return this.parseGroupedExpression();
+    while (!this.currentTokenIs(TokenType.SEMICOLON)) {
+      this.nextToken();
     }
-    // [...]
-  }
-  private parseOperatorExpression() {
-    const operatorExpression = this.newOperatorExpression();
-    operatorExpression.left = this.parseIntegerLiteral();
-    this.advanceTokens();
-    operatorExpression.operator = this.currentToken;
-    this.advanceTokens();
-    operatorExpression.right = this.parseExpression();
-    return operatorExpression;
-  }
-  parseIntegerLiteral() {
-    throw new Error("Method not implemented.");
+    return letToken;
   }
 
-  parseGroupedExpression() {
-    throw new Error("Method not implemented.");
+  currentTokenIs(tokenType: TokenType) {
+    return this.currentToken.type == tokenType;
   }
-  //  --------- parseIfStatement ------------ //
-  private parseIfStatement(): any {
-    throw new Error("Method not implemented.");
+  peekTokenIs(tokenType: TokenType) {
+    return this.peekToken.type == tokenType;
   }
-  //  --------- parseReturnStatement ------------ //
-  private parseReturnStatement(): any {
-    throw new Error("Method not implemented.");
-  }
-
-  //  --------- advanceTokens ------------ //
-
-  parseError(arg0: string) {
-    throw new Error("Method not implemented.");
-  }
-  private newIdentifierASTNode() {
-    throw new Error("Method not implemented.");
-  }
-  //  --------- parseIdentifier ------------ //
-  private newVariableStatementASTNode() {
-    throw new Error("Method not implemented.");
+  expectPeek(tokenType: TokenType) {
+    if (this.peekTokenIs(tokenType)) {
+      this.nextToken();
+      return true;
+    } else {
+      return false;
+    }
   }
 }
