@@ -1,9 +1,12 @@
-import { IStatement } from "ast/statement";
+import { Statement } from "./base";
 
 export class Program {
-  public statements: IStatement[] = [];
+  statements: Statement[];
+  constructor() {
+    this.statements = [];
+  }
 
-  public tokenLiteral(): string {
+  tokenLiteral(): string {
     if (this.statements.length > 0) {
       return this.statements[0].tokenLiteral();
     }
