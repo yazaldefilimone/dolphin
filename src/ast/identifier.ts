@@ -3,6 +3,7 @@ import { Expression } from "./base";
 
 export class Identifier implements Expression {
   private token: Token;
+  private value: string;
   constructor(token: Token) {
     this.token = token;
   }
@@ -13,5 +14,8 @@ export class Identifier implements Expression {
 
   expressionNode(): void {
     throw new Error("Method not implemented.");
+  }
+  toString(): string {
+    return this.value;
   }
 }

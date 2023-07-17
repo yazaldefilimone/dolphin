@@ -1,5 +1,6 @@
 export interface Node {
   tokenLiteral(): string;
+  toString(): string;
 }
 
 export interface Statement extends Node {
