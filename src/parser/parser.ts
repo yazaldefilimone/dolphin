@@ -1,21 +1,32 @@
-import { Identifier, LetStatement, ReturnStatement, parseResult } from "ast";
+import {
+  Expression,
+  Identifier,
+  LetStatement,
+  ReturnStatement,
+  parseResult,
+} from "ast";
+import { ExpressionStatement } from "ast/expression";
 import { Program } from "ast/program";
 import { Lexer } from "lexer";
-import { ErrorHandler } from "parser";
+import { ErrorHandler, Precedence } from "parser";
 import { Token, TokenType } from "token";
+import { prefixParseFn, infixParseFn } from "parser";
 
 export class Parser {
   private lexer: Lexer;
   private currentToken: Token;
   private peekToken: Token;
   public errorHandler: ErrorHandler;
-  prefixParseFns: Map<TokenType, Function>;
-  infixParseFns: Map<TokenType, Function>;
+  prefixParseFns: Map<TokenType, prefixParseFn>;
+  infixParseFns: Map<TokenType, infixParseFn>;
   constructor(lexer: Lexer) {
     this.lexer = lexer;
     this.errorHandler = new ErrorHandler();
     this.nextToken();
     this.nextToken();
+    this.prefixParseFns = new Map();
+    // arrow function for prevent lose the context of `this`
+    this.registerPrefix(TokenType.IDENT, () => this.parseIdentifier());
   }
 
   nextToken() {
@@ -43,7 +54,7 @@ export class Parser {
       case TokenType.RETURN:
         return this.parseReturnStatement();
       default:
-        return null;
+        return this.parseExpressionStatement();
     }
   }
   parseLetStatement(): parseResult<LetStatement> {
@@ -69,12 +80,34 @@ export class Parser {
     }
     return returnToken;
   }
+  parseExpressionStatement(): parseResult<ExpressionStatement> {
+    const expressionStatement = new ExpressionStatement(this.currentToken);
+    const expression = this.parseExpression(Precedence.LOWEST);
+    if (this.isPeekToken(TokenType.SEMICOLON)) {
+      this.nextToken();
+    }
+    expressionStatement.expression = expression;
+    return expressionStatement;
+  }
+  parseExpression(precedence: Precedence): parseResult<Expression> {
+    const prefix = this.prefixParseFns.get(this.currentToken.type);
+    if (prefix === undefined) {
+      return null;
+    }
+    const leftExpression = prefix();
+    return leftExpression;
+  }
+  parseIdentifier(): parseResult<Identifier> {
+    const token = new Identifier(this.currentToken);
+    token.value = this.currentToken.literal;
+    return token;
+  }
   //  --- registers ---
-  registerPrefix(tokenType: TokenType, fn: Function) {
+  registerPrefix(tokenType: TokenType, fn: prefixParseFn) {
     this.prefixParseFns.set(tokenType, fn);
   }
 
-  registerInfix(tokenType: TokenType, fn: Function) {
+  registerInfix(tokenType: TokenType, fn: infixParseFn) {
     this.infixParseFns.set(tokenType, fn);
   }
 
