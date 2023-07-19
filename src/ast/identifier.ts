@@ -3,7 +3,7 @@ import { Expression } from "./base";
 
 export class Identifier implements Expression {
   private token: Token;
-  private value: string;
+  public value: string;
   constructor(token: Token) {
     this.token = token;
   }
