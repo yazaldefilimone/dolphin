@@ -9,6 +9,8 @@ export class Parser {
   private currentToken: Token;
   private peekToken: Token;
   public errorHandler: ErrorHandler;
+  prefixParseFns: Map<TokenType, Function>;
+  infixParseFns: Map<TokenType, Function>;
   constructor(lexer: Lexer) {
     this.lexer = lexer;
     this.errorHandler = new ErrorHandler();
@@ -67,6 +69,15 @@ export class Parser {
     }
     return returnToken;
   }
+  //  --- registers ---
+  registerPrefix(tokenType: TokenType, fn: Function) {
+    this.prefixParseFns.set(tokenType, fn);
+  }
+
+  registerInfix(tokenType: TokenType, fn: Function) {
+    this.infixParseFns.set(tokenType, fn);
+  }
+
   // ---- validate token type ----
   isCurrentToken(tokenType: TokenType) {
     return this.currentToken.type == tokenType;
@@ -83,6 +94,7 @@ export class Parser {
       return false;
     }
   }
+
   // ---- error handling ----
   peekError(tokenType: TokenType) {
     const message = `expected next token to be ${tokenType}, got ${this.peekToken.type} instead`;
