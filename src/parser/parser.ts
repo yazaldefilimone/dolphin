@@ -54,7 +54,7 @@ export class Parser {
     if (!this.expectPeek(TokenType.ASSIGN)) {
       return null;
     }
-    while (!this.currentTokenIs(TokenType.SEMICOLON)) {
+    while (!this.isCurrentToken(TokenType.SEMICOLON)) {
       this.nextToken();
     }
     return letToken;
@@ -62,19 +62,20 @@ export class Parser {
   parseReturnStatement(): parseResult<ReturnStatement> {
     const returnToken = new ReturnStatement(this.currentToken);
     this.nextToken();
-    while (!this.currentTokenIs(TokenType.SEMICOLON)) {
+    while (!this.isCurrentToken(TokenType.SEMICOLON)) {
       this.nextToken();
     }
     return returnToken;
   }
-  currentTokenIs(tokenType: TokenType) {
+
+  isCurrentToken(tokenType: TokenType) {
     return this.currentToken.type == tokenType;
   }
-  peekTokenIs(tokenType: TokenType) {
+  isPeekToken(tokenType: TokenType) {
     return this.peekToken.type == tokenType;
   }
   expectPeek(tokenType: TokenType) {
-    if (this.peekTokenIs(tokenType)) {
+    if (this.isPeekToken(tokenType)) {
       this.nextToken();
       return true;
     } else {
