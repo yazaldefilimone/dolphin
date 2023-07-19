@@ -1,3 +1,3 @@
-import { Expression } from "ast/base";
-export type prefixParseFn = () => Expression;
-export type infixParseFn = (expression: Expression) => Expression;
+import { Expression, parseResult } from "ast/base";
+export type prefixParseFn = () => parseResult<Expression>;
+export type infixParseFn = (expression: Expression) => parseResult<Expression>;
