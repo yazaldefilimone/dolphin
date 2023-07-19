@@ -1,8 +1,9 @@
 import { Lexer } from "lexer";
 import { it, expect, describe } from "vitest";
 import { ErrorHandler, Parser } from "parser";
-import { Program } from "ast";
+import { Identifier, Program } from "ast";
 import { TokenType } from "token";
+import { ExpressionStatement } from "ast/expression";
 
 function printError(errors: ErrorHandler) {
   errors.getErrorsInString().map((message) => {
@@ -16,8 +17,8 @@ const makeSut = (code: string) => {
   const errors = parser.errorHandler.getErrors();
   const errorsInString = parser.errorHandler.getErrorsInString();
   const errorHandler = parser.errorHandler;
-  console.log(program.toString());
-  printError(parser.errorHandler);
+  // console.log(program.toString());
+  // printError(parser.errorHandler);
   return { lexer, parser, program, errors, errorsInString, errorHandler };
 };
 describe("parser", () => {
@@ -53,7 +54,6 @@ describe("parser", () => {
     const { program, parser, errors } = makeSut(code);
     expect(program).instanceOf(Program);
     expect(parser.errorHandler).instanceOf(ErrorHandler);
-    printError(parser.errorHandler);
     expect(errors.length).toBe(3);
   });
 
@@ -77,5 +77,17 @@ describe("parser", () => {
       expect(statement.tokenLiteral()).toEqual("return");
       // expect(statement.returnValue).toEqual(test.expectedValue);
     });
+  });
+  it("identifier expression", () => {
+    const code = "foobar;";
+    const { program } = makeSut(code);
+
+    expect(program.statements.length === 1).toBeTruthy();
+    const statement: any = program.statements[0];
+    expect(statement).toBeInstanceOf(ExpressionStatement);
+    const expression = statement.expression;
+    expect(expression).toBeInstanceOf(Identifier);
+    expect(expression.tokenLiteral()).toEqual("foobar");
+    expect(statement.tokenLiteral()).toEqual("foobar");
   });
 });
