@@ -25,7 +25,6 @@ export class Parser {
     let program = new Program();
     while (this.currentToken.type != TokenType.EOF) {
       let statement = this.parseStatement();
-
       if (statement != null) {
         program.statements.push(statement);
       }
@@ -34,6 +33,7 @@ export class Parser {
 
     return program;
   }
+  // ---- parse statement ----
   parseStatement() {
     switch (this.currentToken.type) {
       case TokenType.LET:
@@ -67,7 +67,7 @@ export class Parser {
     }
     return returnToken;
   }
-
+  // ---- validate token type ----
   isCurrentToken(tokenType: TokenType) {
     return this.currentToken.type == tokenType;
   }
@@ -83,6 +83,7 @@ export class Parser {
       return false;
     }
   }
+  // ---- error handling ----
   peekError(tokenType: TokenType) {
     const message = `expected next token to be ${tokenType}, got ${this.peekToken.type} instead`;
     this.errorHandler.push(message);
