@@ -3,7 +3,7 @@ import { Token } from "token";
 
 export class ExpressionStatement implements Statement {
   token: Token;
-  expression: Expression;
+  expression: Expression | null;
   constructor(token: Token) {
     this.token = token;
   }
