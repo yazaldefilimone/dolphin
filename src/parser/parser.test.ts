@@ -4,6 +4,8 @@ import { ErrorHandler, Parser } from "parser";
 import { Identifier, Program } from "ast";
 import { TokenType } from "token";
 import { ExpressionStatement } from "ast/expression";
+import { IntegerLiteral } from "ast/integer-literal";
+import { PrefixExpression } from "ast/prefix-expression";
 
 function printError(errors: ErrorHandler) {
   errors.getErrorsInString().map((message) => {
@@ -18,7 +20,7 @@ const makeSut = (code: string) => {
   const errorsInString = parser.errorHandler.getErrorsInString();
   const errorHandler = parser.errorHandler;
   // console.log(program.toString());
-  // printError(parser.errorHandler);
+  printError(parser.errorHandler);
   return { lexer, parser, program, errors, errorsInString, errorHandler };
 };
 describe("parser", () => {
@@ -89,5 +91,34 @@ describe("parser", () => {
     expect(expression).toBeInstanceOf(Identifier);
     expect(expression.tokenLiteral()).toEqual("foobar");
     expect(statement.tokenLiteral()).toEqual("foobar");
+  });
+  it("integer literal expression", () => {
+    const code = "5;";
+    const { program } = makeSut(code);
+    expect(program.statements.length === 1).toBeTruthy();
+    const statement: any = program.statements[0];
+    expect(statement).toBeInstanceOf(ExpressionStatement);
+    const expression = statement.expression;
+    expect(expression).toBeInstanceOf(IntegerLiteral);
+    expect(expression.tokenLiteral()).toEqual("5");
+  });
+  it("test prefix expression", () => {
+    const test_code = [
+      { input: "!5;", operator: "!", value: 5 },
+      { input: "-15;", operator: "-", value: 15 },
+      { input: "!false;", operator: "!", value: false },
+    ];
+    test_code.forEach((test) => {
+      const { program, errorHandler } = makeSut(test.input);
+      // printError(errorHandler);
+      expect(program.statements.length).toBe(1);
+      const statement: any = program.statements[0];
+      expect(statement).toBeInstanceOf(ExpressionStatement);
+      const expression = statement.expression;
+      expect(expression).toBeInstanceOf(PrefixExpression);
+      expect(expression.operator).toEqual(test.operator);
+      expect(expression.right).toBeInstanceOf(IntegerLiteral);
+      expect(expression.right.value).toEqual(test.value);
+    });
   });
 });
