@@ -11,6 +11,7 @@ import { Lexer } from "lexer";
 import { ErrorHandler, Precedence } from "parser";
 import { Token, TokenType } from "token";
 import { prefixParseFn, infixParseFn } from "parser";
+import { IntegerLiteral } from "ast/integer-literal";
 
 export class Parser {
   private lexer: Lexer;
@@ -27,6 +28,7 @@ export class Parser {
     this.prefixParseFns = new Map();
     // arrow function for prevent lose the context of `this`
     this.registerPrefix(TokenType.IDENT, () => this.parseIdentifier());
+    this.registerPrefix(TokenType.INT, () => this.parseIntegerLiteral());
   }
 
   nextToken() {
@@ -92,6 +94,7 @@ export class Parser {
   parseExpression(precedence: Precedence): parseResult<Expression> {
     const prefix = this.prefixParseFns.get(this.currentToken.type);
     if (prefix === undefined) {
+      this.noPrefixParseFnError(this.currentToken.type);
       return null;
     }
     const leftExpression = prefix();
@@ -101,6 +104,17 @@ export class Parser {
     const token = new Identifier(this.currentToken);
     token.value = this.currentToken.literal;
     return token;
+  }
+  parseIntegerLiteral(): parseResult<IntegerLiteral> {
+    const integerLiteral = new IntegerLiteral(this.currentToken);
+    const value = parseInt(this.currentToken.literal);
+    if (isNaN(value)) {
+      const message = `could not parse ${this.currentToken.literal} as integer`;
+      this.pushError(message);
+      return null;
+    }
+    integerLiteral.value = value;
+    return integerLiteral;
   }
   //  --- registers ---
   registerPrefix(tokenType: TokenType, fn: prefixParseFn) {
@@ -130,7 +144,15 @@ export class Parser {
 
   // ---- error handling ----
   peekError(tokenType: TokenType) {
-    const message = `expected next token to be ${tokenType}, got ${this.peekToken.type} instead`;
+    const message = `expected next token to be "${tokenType}", got "${this.peekToken.type}" instead`;
+    this.pushError(message);
+  }
+
+  noPrefixParseFnError(tokenType: TokenType) {
+    const message = `no prefix parse function for "${tokenType}" found`;
+    this.pushError(message);
+  }
+  pushError(message: string) {
     this.errorHandler.push(message);
   }
 }
