@@ -12,6 +12,7 @@ import { ErrorHandler, Precedence } from "parser";
 import { Token, TokenType } from "token";
 import { prefixParseFn, infixParseFn } from "parser";
 import { IntegerLiteral } from "ast/integer-literal";
+import { PrefixExpression } from "ast/prefix-expression";
 
 export class Parser {
   private lexer: Lexer;
@@ -29,6 +30,8 @@ export class Parser {
     // arrow function for prevent lose the context of `this`
     this.registerPrefix(TokenType.IDENT, () => this.parseIdentifier());
     this.registerPrefix(TokenType.INT, () => this.parseIntegerLiteral());
+    this.registerPrefix(TokenType.BANG, () => this.parsePrefixExpression());
+    this.registerPrefix(TokenType.MINUS, () => this.parsePrefixExpression());
   }
 
   nextToken() {
@@ -115,6 +118,15 @@ export class Parser {
     }
     integerLiteral.value = value;
     return integerLiteral;
+  }
+  parsePrefixExpression(): parseResult<PrefixExpression> {
+    const expressionStatement = new PrefixExpression(
+      this.currentToken,
+      this.currentToken.literal
+    );
+    this.nextToken();
+    expressionStatement.right = this.parseExpression(Precedence.PREFIX);
+    return expressionStatement;
   }
   //  --- registers ---
   registerPrefix(tokenType: TokenType, fn: prefixParseFn) {
