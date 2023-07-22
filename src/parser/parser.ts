@@ -115,10 +115,11 @@ export class Parser {
       return null;
     }
     let leftExpression = prefix();
-    const precedenceLessThan = precedence < this.peekPrecedence();
-    const notIsPeekToken = !this.isPeekToken(this.currentToken.type);
 
-    while (Boolean(notIsPeekToken && precedenceLessThan)) {
+    while (
+      !this.isPeekToken(this.currentToken.type) &&
+      precedence < this.peekPrecedence()
+    ) {
       let infix = this.infixParseFns.get(this.peekToken.type);
       if (infix === undefined) {
         return leftExpression;
