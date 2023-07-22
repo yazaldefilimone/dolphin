@@ -16,14 +16,21 @@ function debugPrintErrorInString(errors: ErrorHandler) {
 function debugToString(program: Program) {
   console.log(program.toString().concat("\n"));
 }
-export const makeSut = (code: string, isLogError = false, toString = false) => {
+type debugType = {
+  isLogError?: boolean;
+  toString?: boolean;
+};
+export const makeSut = (
+  code: string,
+  debug: debugType = { isLogError: false, toString: false }
+) => {
   const lexer = new Lexer(code);
   const parser = new Parser(lexer);
   const program = parser.parseProgram();
   const errors = parser.errorHandler.getErrors();
   const errorsInString = parser.errorHandler.getErrorsInString();
   const errorHandler = parser.errorHandler;
-  toString && debugToString(program);
-  isLogError && debugPrintErrorInString(parser.errorHandler);
+  debug.toString && debugToString(program);
+  debug.isLogError && debugPrintErrorInString(parser.errorHandler);
   return { lexer, parser, program, errors, errorsInString, errorHandler };
 };

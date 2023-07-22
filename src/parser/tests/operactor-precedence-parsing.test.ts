@@ -25,7 +25,10 @@ describe("Parser", () => {
         },
       ];
       tests.forEach((tt) => {
-        const { program } = makeSut(tt.input, true, true);
+        const { program } = makeSut(tt.input, {
+          toString: true,
+          isLogError: false,
+        });
         expect(program.toString()).toBe(tt.expected);
       });
     });
