@@ -1,7 +1,7 @@
 import { TokenType } from "token";
 
 export enum Precedence {
-  LOWEST = 1,
+  LOWEST = 1, //  because in javaScript, 0 is falsy
   EQUALS, // ==
   LESSGREATER, // > or <
   SUM, // +
