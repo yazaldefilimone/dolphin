@@ -1,6 +1,7 @@
 import {
   Expression,
   Identifier,
+  InfixExpression,
   LetStatement,
   ReturnStatement,
   parseResult,
@@ -8,11 +9,11 @@ import {
 import { ExpressionStatement } from "ast/expression";
 import { Program } from "ast/program";
 import { Lexer } from "lexer";
-import { ErrorHandler, Precedence } from "parser";
+import { ErrorHandler, Precedence, precedences } from "parser";
 import { Token, TokenType } from "token";
 import { prefixParseFn, infixParseFn } from "parser";
 import { IntegerLiteral } from "ast/integer-literal";
-import { PrefixExpression } from "ast/prefix-expression";
+import { PrefixExpression } from "ast";
 
 export class Parser {
   private lexer: Lexer;
@@ -27,11 +28,24 @@ export class Parser {
     this.nextToken();
     this.nextToken();
     this.prefixParseFns = new Map();
-    // arrow function for prevent lose the context of `this`
-    this.registerPrefix(TokenType.IDENT, () => this.parseIdentifier());
-    this.registerPrefix(TokenType.INT, () => this.parseIntegerLiteral());
-    this.registerPrefix(TokenType.BANG, () => this.parsePrefixExpression());
-    this.registerPrefix(TokenType.MINUS, () => this.parsePrefixExpression());
+    this.infixParseFns = new Map();
+    // prefix registers
+    this.registerPrefix(TokenType.IDENT, this.parseIdentifier.bind(this));
+    this.registerPrefix(TokenType.INT, this.parseIntegerLiteral.bind(this));
+    this.registerPrefix(TokenType.BANG, this.parsePrefixExpression.bind(this));
+    this.registerPrefix(TokenType.MINUS, this.parsePrefixExpression.bind(this));
+    // infix registers
+    this.registerInfix(TokenType.PLUS, this.parseInfixExpression.bind(this));
+    this.registerInfix(TokenType.LT, this.parseInfixExpression.bind(this));
+    this.registerInfix(TokenType.GT, this.parseInfixExpression.bind(this));
+    this.registerInfix(TokenType.MINUS, this.parseInfixExpression.bind(this));
+    this.registerInfix(TokenType.SLASH, this.parseInfixExpression.bind(this));
+    this.registerInfix(
+      TokenType.ASTERISK,
+      this.parseInfixExpression.bind(this)
+    );
+    this.registerInfix(TokenType.EQ, this.parseInfixExpression.bind(this));
+    this.registerInfix(TokenType.NOT_EQ, this.parseInfixExpression.bind(this));
   }
 
   nextToken() {
@@ -100,7 +114,22 @@ export class Parser {
       this.noPrefixParseFnError(this.currentToken.type);
       return null;
     }
-    const leftExpression = prefix();
+    let leftExpression = prefix();
+    const precedenceLessThan = precedence < this.peekPrecedence();
+    const notIsPeekToken = !this.isPeekToken(this.currentToken.type);
+
+    while (Boolean(notIsPeekToken && precedenceLessThan)) {
+      let infix = this.infixParseFns.get(this.peekToken.type);
+      if (infix === undefined) {
+        return leftExpression;
+      }
+      this.nextToken();
+      if (leftExpression !== null) {
+        leftExpression = infix(leftExpression);
+      } else {
+        leftExpression = null;
+      }
+    }
     return leftExpression;
   }
   parseIdentifier(): parseResult<Identifier> {
@@ -128,6 +157,16 @@ export class Parser {
     expressionStatement.right = this.parseExpression(Precedence.PREFIX);
     return expressionStatement;
   }
+  parseInfixExpression(left: Expression): parseResult<Expression> {
+    const operator = this.currentToken.literal;
+    const token = this.currentToken;
+    const expression = new InfixExpression(token, operator);
+    expression.left = left;
+    const precedence = this.currentPrecedence();
+    this.nextToken();
+    expression.right = this.parseExpression(precedence);
+    return expression;
+  }
   //  --- registers ---
   registerPrefix(tokenType: TokenType, fn: prefixParseFn) {
     this.prefixParseFns.set(tokenType, fn);
@@ -152,6 +191,20 @@ export class Parser {
       this.peekError(tokenType);
       return false;
     }
+  }
+  peekPrecedence() {
+    const precedence = precedences[this.peekToken.type];
+    if (precedence) {
+      return precedence;
+    }
+    return Precedence.LOWEST;
+  }
+  currentPrecedence() {
+    const precedence = precedences[this.currentToken.type];
+    if (precedence) {
+      return precedence;
+    }
+    return Precedence.LOWEST;
   }
 
   // ---- error handling ----
