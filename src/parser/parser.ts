@@ -1,4 +1,5 @@
 import {
+  BooleanLiteral,
   Expression,
   Identifier,
   InfixExpression,
@@ -33,6 +34,8 @@ export class Parser {
     this.registerPrefix(TokenType.IDENT, this.parseIdentifier.bind(this));
     this.registerPrefix(TokenType.INT, this.parseIntegerLiteral.bind(this));
     this.registerPrefix(TokenType.BANG, this.parsePrefixExpression.bind(this));
+    this.registerPrefix(TokenType.FALSE, this.parseBoolean.bind(this));
+    this.registerPrefix(TokenType.TRUE, this.parseBoolean.bind(this));
     this.registerPrefix(TokenType.MINUS, this.parsePrefixExpression.bind(this));
     // infix registers
     this.registerInfix(TokenType.PLUS, this.parseInfixExpression.bind(this));
@@ -40,6 +43,7 @@ export class Parser {
     this.registerInfix(TokenType.GT, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.MINUS, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.SLASH, this.parseInfixExpression.bind(this));
+
     this.registerInfix(
       TokenType.ASTERISK,
       this.parseInfixExpression.bind(this)
@@ -167,6 +171,12 @@ export class Parser {
     this.nextToken();
     expression.right = this.parseExpression(precedence);
     return expression;
+  }
+  parseBoolean(): parseResult<BooleanLiteral> {
+    return new BooleanLiteral(
+      this.currentToken,
+      this.isCurrentToken(TokenType.TRUE)
+    );
   }
   //  --- registers ---
   registerPrefix(tokenType: TokenType, fn: prefixParseFn) {
