@@ -6,4 +6,5 @@ export * from "./return";
 export * from "./expression";
 export * from "./integer-literal";
 export * from "./prefix";
-export * from "./Infix";
+export * from "./infix";
+export * from "./boolean";
