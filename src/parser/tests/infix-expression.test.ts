@@ -54,9 +54,27 @@ describe("Parser", () => {
           operator: "!=",
           rightValue: 5,
         },
+        {
+          input: "true == true;",
+          leftValue: true,
+          operator: "==",
+          rightValue: true,
+        },
+        {
+          input: "true != false;",
+          leftValue: true,
+          operator: "!=",
+          rightValue: false,
+        },
+        {
+          input: "false == false;",
+          leftValue: false,
+          operator: "==",
+          rightValue: false,
+        },
       ];
       infixTests.forEach((infixTest) => {
-        const { program } = makeSut(infixTest.input, true, true);
+        const { program } = makeSut(infixTest.input);
         expect(program.statements.length === 1).toBeTruthy();
         const statement: any = program.statements[0];
         expect(statement).toBeInstanceOf(ExpressionStatement);
@@ -64,9 +82,7 @@ describe("Parser", () => {
         expect(expression).toBeInstanceOf(InfixExpression);
         expect(expression.tokenLiteral()).toEqual(infixTest.operator);
         expect(expression.operator).toEqual(infixTest.operator);
-        expect(expression.left).toBeInstanceOf(IntegerLiteral);
         expect(expression.left.value).toEqual(infixTest.leftValue);
-        expect(expression.right).toBeInstanceOf(IntegerLiteral);
         expect(expression.right.value).toEqual(infixTest.rightValue);
       });
     });

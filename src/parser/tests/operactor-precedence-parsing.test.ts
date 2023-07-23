@@ -33,4 +33,20 @@ describe("Parser", () => {
       });
     });
   });
+  it("boolean and operator precedence parsing", () => {
+    const tests = [
+      { input: "true;", expected: "true" },
+      { input: "false;", expected: "false" },
+      { input: "3 > 5 == false", expected: "((3 > 5) == false)" },
+      { input: "3 < 5 == true", expected: "((3 < 5) == true)" },
+    ];
+
+    tests.forEach((tt) => {
+      const { program } = makeSut(tt.input, {
+        toString: true,
+        isLogError: false,
+      });
+      expect(program.toString()).toBe(tt.expected);
+    });
+  });
 });
