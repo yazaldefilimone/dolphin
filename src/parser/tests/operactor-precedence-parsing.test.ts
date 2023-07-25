@@ -1,5 +1,6 @@
 import { it, expect, describe } from "vitest";
 import { makeSut } from "./sut";
+import { ExpressionStatement, PrefixExpression } from "ast";
 
 describe("Parser", () => {
   describe("parse program", () => {
@@ -25,10 +26,7 @@ describe("Parser", () => {
         },
       ];
       tests.forEach((tt) => {
-        const { program } = makeSut(tt.input, {
-          toString: true,
-          isLogError: false,
-        });
+        const { program } = makeSut(tt.input);
         expect(program.toString()).toBe(tt.expected);
       });
     });
@@ -42,9 +40,35 @@ describe("Parser", () => {
     ];
 
     tests.forEach((tt) => {
+      const { program } = makeSut(tt.input);
+      expect(program.toString()).toBe(tt.expected);
+    });
+  });
+  it("boolean bang operator precedence parsing", () => {
+    const tests = [
+      { input: "!true", operator: "!", value: true },
+      { input: "!false", operator: "!", value: false },
+    ];
+    tests.forEach((tt) => {
+      const { program } = makeSut(tt.input);
+      const statement: any = program.statements[0];
+      expect(statement?.expression?.operator).toBe(tt.operator);
+      expect(statement?.expression?.right.value).toBe(tt.value);
+    });
+  });
+
+  it("operator group precedence parsing", () => {
+    const tests = [
+      { input: "1 + (2 + 3) + 4", expected: "((1 + (2 + 3)) + 4)" },
+      { input: "(5 + 5) * 2", expected: "((5 + 5) * 2)" },
+      { input: "2 / (5 + 5)", expected: "(2 / (5 + 5))" },
+      { input: "-(5 + 5)", expected: "(-(5 + 5))" },
+      { input: "!(true == true)", expected: "(!(true == true))" },
+    ];
+    tests.forEach((tt) => {
       const { program } = makeSut(tt.input, {
-        toString: true,
-        isLogError: false,
+        isLogError: true,
+        toString: false,
       });
       expect(program.toString()).toBe(tt.expected);
     });
