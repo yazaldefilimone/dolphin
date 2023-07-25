@@ -14,9 +14,9 @@ export class ReturnStatement implements Statement {
   }
 
   toString(): string {
-    const out_string = this.tokenLiteral().concat(" ");
+    let out_string = this.tokenLiteral().concat(" ");
     if (this.returnValue !== null) {
-      out_string.concat(this.returnValue.toString());
+      out_string = out_string.concat(this.returnValue.toString());
     }
     return out_string.concat(";");
   }
