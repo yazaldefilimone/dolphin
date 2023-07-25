@@ -8,3 +8,5 @@ export * from "./integer-literal";
 export * from "./prefix";
 export * from "./infix";
 export * from "./boolean";
+export * from "./if";
+export * from "./block";
