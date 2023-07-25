@@ -19,7 +19,6 @@ describe("Parser", () => {
       tests.forEach((tt, index) => {
         const statement: ExpressionStatement = program.statements[index] as any;
         const expression = statement.expression as BooleanLiteral;
-        console.log({ statement });
         expect(expression).instanceOf(BooleanLiteral);
         expect(expression.tokenLiteral()).toBe(tt.expected);
         expect(expression.value).toBe(tt.value);
