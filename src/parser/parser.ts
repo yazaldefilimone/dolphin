@@ -1,7 +1,9 @@
 import {
+  BlockStatement,
   BooleanLiteral,
   Expression,
   Identifier,
+  IfExpression,
   InfixExpression,
   LetStatement,
   ReturnStatement,
@@ -41,6 +43,7 @@ export class Parser {
       TokenType.LPAREN,
       this.parseGroupedExpression.bind(this)
     );
+    this.registerPrefix(TokenType.IF, this.parseIfExpression.bind(this));
     // infix registers
     this.registerInfix(TokenType.PLUS, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.LT, this.parseInfixExpression.bind(this));
@@ -89,11 +92,13 @@ export class Parser {
     if (!this.expectPeek(TokenType.IDENT)) {
       return null;
     }
-    let identifier = new Identifier(this.currentToken);
+    let identifier = this.parseIdentifier();
     letToken.name = identifier;
     if (!this.expectPeek(TokenType.ASSIGN)) {
       return null;
     }
+    // To-do
+    // letToken.value = this.
     while (!this.isCurrentToken(TokenType.SEMICOLON)) {
       this.nextToken();
     }
@@ -141,7 +146,7 @@ export class Parser {
     }
     return leftExpression;
   }
-  parseIdentifier(): parseResult<Identifier> {
+  parseIdentifier(): Identifier {
     const token = new Identifier(this.currentToken);
     token.value = this.currentToken.literal;
     return token;
@@ -189,6 +194,51 @@ export class Parser {
       return null;
     }
     return expression;
+  }
+  parseIfExpression(): parseResult<IfExpression> {
+    const expression = new IfExpression(this.currentToken);
+    if (!this.expectPeek(TokenType.LPAREN)) {
+      return null;
+    }
+    this.nextToken();
+    expression.condition = this.parseExpression(Precedence.LOWEST);
+
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return null;
+    }
+
+    if (!this.expectPeek(TokenType.LBRACE)) {
+      return null;
+    }
+
+    expression.consequence = this.parseBlockStatement();
+    if (this.isPeekToken(TokenType.ELSE)) {
+      this.nextToken();
+
+      if (!this.expectPeek(TokenType.LBRACE)) {
+        return null;
+      }
+
+      expression.alternative = this.parseBlockStatement();
+    }
+    return expression;
+  }
+  parseBlockStatement(): parseResult<BlockStatement> {
+    const block = new BlockStatement(this.currentToken);
+
+    this.nextToken();
+
+    while (
+      !this.isCurrentToken(TokenType.RBRACE) &&
+      !this.isCurrentToken(TokenType.EOF)
+    ) {
+      const statement = this.parseStatement();
+      if (statement !== null) {
+        block.statements.push(statement);
+      }
+      this.nextToken();
+    }
+    return block;
   }
   //  --- registers ---
   registerPrefix(tokenType: TokenType, fn: prefixParseFn) {
