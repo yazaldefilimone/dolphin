@@ -26,6 +26,8 @@ describe("Parser", () => {
         expect(statement.tokenLiteral()).toBe("let");
         expect(identifier.tokenLiteral()).toBe(test.expectedIdentifier);
         expect(identifier.token.type).toBe(TokenType.IDENT);
+        // To-do: fix it
+        // expect(statement.toString()).toEqual("let x = 5;");
       });
     });
   });

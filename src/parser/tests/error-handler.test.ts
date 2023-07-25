@@ -10,10 +10,7 @@ describe("Parser", () => {
     let = 10;
     let 838383;
     `;
-      const { program, parser, errors } = makeSut(code, {
-        isLogError: true,
-        toString: false,
-      });
+      const { program, parser, errors } = makeSut(code);
       expect(program).instanceOf(Program);
       expect(parser.errorHandler).instanceOf(ErrorHandler);
       expect(errors.length).toBe(4);
