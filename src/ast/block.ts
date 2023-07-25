@@ -12,7 +12,8 @@ export class BlockStatement implements Statement {
     return this.token.literal;
   }
   toString(): string {
-    return this.statements.map((statement) => statement.toString()).join("");
+    const out = this.statements.map((statement) => statement.toString());
+    return `{${out.join("")}}`;
   }
   statementNode(): void {
     throw new Error("Method not implemented.");
