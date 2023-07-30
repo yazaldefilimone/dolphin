@@ -1,6 +1,7 @@
 import { Expression } from "ast";
 import { Token } from "token";
 import { BlockStatement } from "ast";
+import { concatenationOfString } from "utils";
 
 export class IfExpression implements Expression {
   private token: Token;
@@ -15,17 +16,17 @@ export class IfExpression implements Expression {
     return this.token.literal;
   }
   toString(): string {
-    let out = "if";
+    const concat = concatenationOfString("if");
     if (this.condition !== null) {
-      out = out.concat(" ", this.condition.toString());
+      concat.plus([" ", this.condition.toString()]);
     }
     if (this.consequence !== null) {
-      out = out.concat(" ", this.consequence.toString());
+      concat.plus([" ", this.consequence.toString()]);
     }
     if (this.alternative !== null) {
-      out = out.concat(" ", "else", " ", this.alternative.toString());
+      concat.plus([" ", "else", " ", this.alternative.toString()]);
     }
-    return out;
+    return concat.get();
   }
 
   expressionNode(): void {
