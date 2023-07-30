@@ -28,5 +28,26 @@ describe("Parser", () => {
       expect(bodyStatement?.toString()).toBe("(x + y)");
       expect(statement.toString()).toBe("fn(x,y) {(x + y)}");
     });
+    it("parse function literal with no parameters", () => {
+      let code = "fn() { x + y; }";
+      const { program } = makeSut(code, {
+        isLogError: true,
+        toString: false,
+      });
+      expect(program.statements.length).toBe(1);
+      const statement = program.statements[0] as ExpressionStatement;
+      expect(statement.tokenLiteral()).toBe("fn");
+      expect(statement).toBeInstanceOf(ExpressionStatement);
+      expect(statement.expression).toBeInstanceOf(FunctionLiteral);
+      const functionLiteral = statement.expression as FunctionLiteral;
+      expect(functionLiteral.parameters?.length).toBe(0);
+      expect(functionLiteral.body).toBeInstanceOf(BlockStatement);
+      const body = functionLiteral.body as BlockStatement;
+      expect(body?.statements.length).toBe(1);
+      expect(body?.statements[0]).toBeInstanceOf(ExpressionStatement);
+      const bodyStatement = body?.statements[0] as ExpressionStatement;
+      expect(bodyStatement?.toString()).toBe("(x + y)");
+      expect(statement.toString()).toBe("fn() {(x + y)}");
+    });
   });
 });
