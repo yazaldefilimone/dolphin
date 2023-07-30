@@ -17,6 +17,7 @@ import { Token, TokenType } from "token";
 import { prefixParseFn, infixParseFn } from "parser";
 import { IntegerLiteral } from "ast/integer-literal";
 import { PrefixExpression } from "ast";
+import { FunctionLiteral } from "ast/function";
 
 export class Parser {
   private lexer: Lexer;
@@ -42,6 +43,10 @@ export class Parser {
     this.registerPrefix(
       TokenType.LPAREN,
       this.parseGroupedExpression.bind(this)
+    );
+    this.registerPrefix(
+      TokenType.FUNCTION,
+      this.parseFunctionLiteral.bind(this)
     );
     this.registerPrefix(TokenType.IF, this.parseIfExpression.bind(this));
     // infix registers
@@ -240,6 +245,45 @@ export class Parser {
     }
     return block;
   }
+  parseFunctionLiteral(): parseResult<FunctionLiteral> {
+    const functionLiteral = new FunctionLiteral(this.currentToken);
+    if (!this.expectPeek(TokenType.LPAREN)) {
+      return null;
+    }
+    functionLiteral.parameters = this.parseFunctionParameters();
+    if (!this.expectPeek(TokenType.LBRACE)) {
+      return null;
+    }
+    functionLiteral.body = this.parseBlockStatement();
+    return functionLiteral;
+  }
+
+  parseFunctionParameters(): parseResult<Identifier[]> {
+    const identifiers: Identifier[] = [];
+
+    if (this.isPeekToken(TokenType.RPAREN)) {
+      this.nextToken();
+      return identifiers;
+    }
+    this.nextToken();
+    const identifier = new Identifier(this.currentToken);
+    identifier.value = this.currentToken.literal;
+    identifiers.push(identifier);
+
+    while (this.isPeekToken(TokenType.COMMA)) {
+      this.nextToken();
+      this.nextToken();
+
+      const identifier = new Identifier(this.currentToken);
+      identifier.value = this.currentToken.literal;
+      identifiers.push(identifier);
+    }
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return null;
+    }
+    return identifiers;
+  }
+
   //  --- registers ---
   registerPrefix(tokenType: TokenType, fn: prefixParseFn) {
     this.prefixParseFns.set(tokenType, fn);
