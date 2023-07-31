@@ -29,4 +29,27 @@ describe("Parser", () => {
       expect(callExpression.arguments[2].toString()).toBe("(4 + 5)");
     });
   });
+  it("should operator precedence parser", () => {
+    const tests = [
+      {
+        code: `a + add(b * c) + b`,
+        expect: `((a + add((b * c))) + b)`,
+      },
+      {
+        code: `add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))`,
+        expect: `add(a,b,1,(2 * 3),(4 + 5),add(6,(7 * 8)))`,
+      },
+      {
+        code: `add(a + b + c * d / f + g)`,
+        expect: `add((((a + b) + ((c * d) / f)) + g))`,
+      },
+    ];
+    tests.forEach((test) => {
+      const { program } = makeSut(test.code, {
+        isLogError: true,
+        toString: false,
+      });
+      expect(program.toString()).toEqual(test.expect);
+    });
+  });
 });
