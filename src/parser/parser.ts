@@ -1,6 +1,7 @@
 import {
   BlockStatement,
   BooleanLiteral,
+  CallExpression,
   Expression,
   Identifier,
   IfExpression,
@@ -9,6 +10,7 @@ import {
   ReturnStatement,
   parseResult,
 } from "ast";
+
 import { ExpressionStatement } from "ast/expression";
 import { Program } from "ast/program";
 import { Lexer } from "lexer";
@@ -62,6 +64,7 @@ export class Parser {
     );
     this.registerInfix(TokenType.EQ, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.NOT_EQ, this.parseInfixExpression.bind(this));
+    this.registerInfix(TokenType.LPAREN, this.parseCallExpression.bind(this));
   }
 
   nextToken() {
@@ -283,7 +286,39 @@ export class Parser {
     }
     return identifiers;
   }
+  parseCallExpression(fn: Expression): parseResult<CallExpression> {
+    const expression = new CallExpression(this.currentToken);
+    expression.function = fn;
+    expression.arguments = this.parseCallArguments();
+    return expression;
+  }
+  parseCallArguments(): parseResult<Expression[]> {
+    const args: Expression[] = [];
 
+    if (this.isPeekToken(TokenType.RPAREN)) {
+      this.nextToken();
+      return args;
+    }
+
+    this.nextToken();
+    const arg = this.parseExpression(Precedence.LOWEST);
+    if (arg) {
+      args.push(arg);
+    }
+    while (this.isPeekToken(TokenType.COMMA)) {
+      this.nextToken();
+      this.nextToken();
+      const arg = this.parseExpression(Precedence.LOWEST);
+      if (arg) {
+        args.push(arg);
+      }
+    }
+
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return null;
+    }
+    return args;
+  }
   //  --- registers ---
   registerPrefix(tokenType: TokenType, fn: prefixParseFn) {
     this.prefixParseFns.set(tokenType, fn);
