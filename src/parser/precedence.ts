@@ -12,7 +12,7 @@ export enum Precedence {
 
 type precedenceMapType = Partial<Record<TokenType, Precedence>>;
 export const precedences: precedenceMapType = {
-  [TokenType.LPAREN]: Precedence.LOWEST,
+  [TokenType.LPAREN]: Precedence.CALL,
   [TokenType.ASTERISK]: Precedence.PRODUCT,
   [TokenType.SLASH]: Precedence.PRODUCT,
   [TokenType.LT]: Precedence.LESSGREATER,
