@@ -10,3 +10,5 @@ export * from "./infix";
 export * from "./boolean";
 export * from "./if";
 export * from "./block";
+export * from "./function";
+export * from "./call";
