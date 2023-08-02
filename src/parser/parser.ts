@@ -106,7 +106,9 @@ export class Parser {
       return null;
     }
     // To-do
+    this.nextToken();
     // letToken.value = this.
+    letToken.value = this.parseExpression(Precedence.LOWEST);
     while (!this.isCurrentToken(TokenType.SEMICOLON)) {
       this.nextToken();
     }
@@ -115,6 +117,7 @@ export class Parser {
   parseReturnStatement(): parseResult<ReturnStatement> {
     const returnToken = new ReturnStatement(this.currentToken);
     this.nextToken();
+    returnToken.returnValue = this.parseExpression(Precedence.LOWEST);
     while (!this.isCurrentToken(TokenType.SEMICOLON)) {
       this.nextToken();
     }
