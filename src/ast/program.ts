@@ -17,7 +17,9 @@ export class Program implements Statement {
     return "";
   }
   toString(): string {
-    const statementInString = this.statements.map((stmt) => stmt.toString());
-    return statementInString.join("");
+    const statementInString = this.statements.reduce((acc, stmt) => {
+      return acc + stmt.toString();
+    }, "");
+    return statementInString;
   }
 }
