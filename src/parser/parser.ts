@@ -109,7 +109,7 @@ export class Parser {
     this.nextToken();
     // letToken.value = this.
     letToken.value = this.parseExpression(Precedence.LOWEST);
-    while (!this.isCurrentToken(TokenType.SEMICOLON)) {
+    if (this.isPeekToken(TokenType.SEMICOLON)) {
       this.nextToken();
     }
     return letToken;
@@ -374,5 +374,8 @@ export class Parser {
   }
   pushError(message: string) {
     this.errorHandler.push(message);
+  }
+  isError() {
+    return this.errorHandler.errors.length > 0;
   }
 }
