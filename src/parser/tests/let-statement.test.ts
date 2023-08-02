@@ -13,9 +13,13 @@ describe("Parser", () => {
     `;
       const { program } = makeSut(code);
       const tests = [
-        { expectedIdentifier: "x" },
-        { expectedIdentifier: "y" },
-        { expectedIdentifier: "foobar" },
+        { expectedIdentifier: "x", expectedValue: 5, string: "let x = 5;" },
+        { expectedIdentifier: "y", expectedValue: 10, string: "let y = 10;" },
+        {
+          expectedIdentifier: "foobar",
+          expectedValue: 838383,
+          string: "let foobar = 838383;",
+        },
       ];
       expect(program).not.toBeNull();
       expect(program).instanceOf(Program);
@@ -26,8 +30,8 @@ describe("Parser", () => {
         expect(statement.tokenLiteral()).toBe("let");
         expect(identifier.tokenLiteral()).toBe(test.expectedIdentifier);
         expect(identifier.token.type).toBe(TokenType.IDENT);
-        // To-do: fix it
-        // expect(statement.toString()).toEqual("let x = 5;");
+        expect(statement.value?.value).toBe(test.expectedValue);
+        expect(statement.toString()).toEqual(test.string);
       });
     });
   });

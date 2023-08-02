@@ -22,8 +22,7 @@ describe("Parser", () => {
         const statement: any = program.statements[index];
         expect(statement.token.type).toEqual(TokenType.RETURN);
         expect(statement.tokenLiteral()).toEqual("return");
-        // TODO: Fix this
-        // expect(statement.returnValue).toEqual(test.expectedValue);
+        expect(statement.returnValue?.value).toEqual(test.expectedValue);
       });
     });
   });
