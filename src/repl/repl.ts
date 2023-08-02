@@ -1,6 +1,8 @@
-import readline from "readline";
+import readline from "node:readline";
+import { stdin, stdout } from "node:process";
+
 import { Lexer } from "lexer";
-import { TokenType } from "token";
+import { ErrorHandler, Parser } from "parser";
 
 const ScannerClose = {
   exit: "exit",
@@ -11,22 +13,32 @@ const exits = [ScannerClose.exit, ScannerClose.quit];
 
 export function startReadEvalPrintLoop() {
   const scanner = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
+    input: stdin,
+    output: stdout,
   });
 
   function repl() {
     scanner.question(">> ", (input) => {
       if (exits.includes(input)) return scanner.close();
       const lexer = new Lexer(input);
-      let token = lexer.nextToken();
-      while (token.type !== TokenType.EOF) {
-        console.log(token);
-        token = lexer.nextToken();
+      const parser = new Parser(lexer);
+      const program = parser.parseProgram();
+      if (parser.isError()) {
+        printError(parser.errorHandler);
+        repl();
       }
+      console.log(program.toString());
       repl();
     });
   }
   console.log("Welcome!");
   repl();
+}
+
+function printError(errorHandler: ErrorHandler) {
+  console.log("Woops! We ran into some dolphin business here!");
+  console.log(" parser errors:");
+  errorHandler
+    .getErrorsInString()
+    .forEach((error) => console.log(`\t${error}`, "\n"));
 }
