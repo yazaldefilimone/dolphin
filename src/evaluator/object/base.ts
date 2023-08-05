@@ -3,7 +3,8 @@ export enum objectType {
   BOOLEAN = "BOOLEAN",
   NULL = "NULL",
 }
-export interface BaseObject {
+export interface BaseObject<T = unknown> {
   type(): objectType;
   inspect(): string;
+  get value(): T;
 }
