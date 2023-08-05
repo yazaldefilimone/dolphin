@@ -8,6 +8,7 @@ import {
   InfixExpression,
   LetStatement,
   ReturnStatement,
+  Statement,
 } from "ast";
 import { Maybe } from "utils";
 
@@ -85,7 +86,7 @@ export class Parser {
     return program;
   }
   // ---- parse statement ----
-  parseStatement() {
+  parseStatement(): Maybe<Statement> {
     switch (this.currentToken.type) {
       case TokenType.LET:
         return this.parseLetStatement();
