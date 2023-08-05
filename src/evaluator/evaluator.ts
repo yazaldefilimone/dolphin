@@ -15,7 +15,7 @@ import { Integer } from "./object/integer";
 
 export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
   if (node === null) return null;
-  switch (node?.kind) {
+  switch (node.kind) {
     case ProgramKind.program:
       return evaluatorStatements((node as Program).statements);
     case StatementKind.EXPRESSION:
