@@ -16,7 +16,7 @@ describe("Evaluator", () => {
 
     tests.forEach((tt) => {
       const evaluated = makeSut(tt.input);
-      expect(evaluated).toEqual(tt.expected);
+      expect(evaluated?.value).toEqual(tt.expected);
     });
   });
 });
