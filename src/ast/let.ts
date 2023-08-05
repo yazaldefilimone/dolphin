@@ -1,13 +1,16 @@
 import { Token } from "token";
-import { Expression, Statement } from "./base";
+import { Expression, ProgramKind, Statement, StatementKind } from "./base";
 import { Identifier } from "./identifier";
+import { Maybe } from "utils";
 
 export class LetStatement implements Statement {
   token: Token;
   name: Identifier;
-  value: Expression | null = null;
+  value: Maybe<Expression> = null;
+  kind: StatementKind;
   constructor(token: Token) {
     this.token = token;
+    this.kind = StatementKind.LET;
   }
 
   tokenLiteral(): string {

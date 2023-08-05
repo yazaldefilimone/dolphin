@@ -1,13 +1,16 @@
 import { Token } from "token";
-import { Expression } from "./base";
+import { Expression, ExpressionKind } from "./base";
+import { Maybe } from "utils";
 
 export class PrefixExpression implements Expression {
   private token: Token;
   private operator: string;
-  right: Expression | null = null;
+  right: Maybe<Expression> = null;
+  kind: ExpressionKind;
   constructor(token: Token, operator: string) {
     this.token = token;
     this.operator = operator;
+    this.kind = ExpressionKind.PREFIX;
   }
 
   tokenLiteral(): string {

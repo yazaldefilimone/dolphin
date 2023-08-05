@@ -1,11 +1,13 @@
 import { Token } from "token";
-import { Expression } from "./base";
+import { Expression, ExpressionKind } from "./base";
 
 export class IntegerLiteral implements Expression {
   private token: Token;
   public value: number;
+  kind: ExpressionKind;
   constructor(token: Token) {
     this.token = token;
+    this.kind = ExpressionKind.INTEGER;
   }
 
   tokenLiteral(): string {

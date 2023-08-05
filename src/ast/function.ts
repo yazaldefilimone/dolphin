@@ -1,14 +1,15 @@
 import { Token } from "token";
-import { Expression } from "./base";
-import { Identifier } from "./identifier";
-import { BlockStatement } from "./block";
-import { concatenationOfString } from "utils";
+import { Expression, ExpressionKind, Identifier, BlockStatement } from "ast";
+import { Maybe, concatenationOfString } from "utils";
+
 export class FunctionLiteral implements Expression {
   private token: Token;
-  parameters: Identifier[] | null = null;
-  body: BlockStatement | null = null;
+  parameters: Maybe<Identifier[]> = null;
+  body: Maybe<BlockStatement> = null;
+  kind: ExpressionKind;
   constructor(token: Token) {
     this.token = token;
+    this.kind = ExpressionKind.FUNCTION;
   }
 
   tokenLiteral(): string {

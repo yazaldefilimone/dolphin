@@ -1,11 +1,14 @@
-import { Expression, Statement } from "ast";
+import { Expression, ProgramKind, Statement, StatementKind } from "ast";
 import { Token } from "token";
+import { Maybe } from "utils";
 
 export class ExpressionStatement implements Statement {
   token: Token;
-  expression: Expression | null;
+  expression: Maybe<Expression>;
+  kind: StatementKind;
   constructor(token: Token) {
     this.token = token;
+    this.kind = StatementKind.EXPRESSION;
   }
   tokenLiteral() {
     return this.token.literal;

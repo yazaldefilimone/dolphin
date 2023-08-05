@@ -1,14 +1,17 @@
 import { Token } from "token";
-import { Expression } from "./base";
+import { Expression, ExpressionKind } from "./base";
+import { Maybe } from "utils";
 
 export class InfixExpression implements Expression {
   private token: Token;
-  left: Expression | null = null;
+  left: Maybe<Expression> = null;
   operator: string;
-  right: Expression | null = null;
+  right: Maybe<Expression> = null;
+  kind: ExpressionKind;
   constructor(token: Token, operator: string) {
     this.token = token;
     this.operator = operator;
+    this.kind = ExpressionKind.INFIX;
   }
 
   tokenLiteral(): string {

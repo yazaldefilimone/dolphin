@@ -1,11 +1,13 @@
 import { Token } from "token";
-import { Expression } from "./base";
+import { Expression, ExpressionKind } from "./base";
 
 export class Identifier implements Expression {
   private token: Token;
   public value: string;
+  kind: ExpressionKind;
   constructor(token: Token) {
     this.token = token;
+    this.kind = ExpressionKind.IDENTIFIER;
   }
 
   tokenLiteral(): string {

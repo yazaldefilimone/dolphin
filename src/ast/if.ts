@@ -1,4 +1,4 @@
-import { Expression } from "ast";
+import { Expression, ExpressionKind } from "ast";
 import { Token } from "token";
 import { BlockStatement } from "ast";
 import { concatenationOfString } from "utils";
@@ -8,8 +8,10 @@ export class IfExpression implements Expression {
   condition: Expression | null = null;
   consequence: BlockStatement | null = null;
   alternative: BlockStatement | null = null;
+  kind: ExpressionKind;
   constructor(token: Token) {
     this.token = token;
+    this.kind = ExpressionKind.IF;
   }
 
   tokenLiteral(): string {

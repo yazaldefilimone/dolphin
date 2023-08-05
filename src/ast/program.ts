@@ -1,9 +1,11 @@
-import { Statement } from "./base";
+import { Statement, ProgramKind } from "./base";
 
 export class Program implements Statement {
   statements: Statement[];
+  kind: ProgramKind.program;
   constructor() {
     this.statements = [];
+    this.kind = ProgramKind.program;
   }
 
   statementNode(): void {

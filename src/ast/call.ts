@@ -1,13 +1,15 @@
 import { Token } from "token";
-import { Expression } from "./base";
-import { concatenationOfString } from "utils";
+import { Expression, ExpressionKind } from "ast";
+import { Maybe, concatenationOfString } from "utils";
 
 export class CallExpression implements Expression {
   token: Token;
-  arguments: Expression[] | null = null;
+  arguments: Maybe<Expression[]> = null;
   function: Expression;
+  kind: ExpressionKind;
   constructor(token: Token) {
     this.token = token;
+    this.kind = ExpressionKind.CALL;
   }
 
   tokenLiteral(): string {

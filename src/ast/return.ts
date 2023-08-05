@@ -1,12 +1,15 @@
 import { Token } from "token";
-import { Expression, Statement } from "./base";
+import { Expression, ProgramKind, Statement, StatementKind } from "./base";
+import { Maybe } from "utils";
 
 export class ReturnStatement implements Statement {
   token: Token;
-  returnValue: Expression | null;
+  returnValue: Maybe<Expression>;
+  kind: StatementKind;
   constructor(token: Token) {
     this.token = token;
     this.returnValue = null;
+    this.kind = StatementKind.RETURN;
   }
 
   tokenLiteral(): string {
