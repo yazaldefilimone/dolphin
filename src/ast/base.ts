@@ -10,5 +10,3 @@ export interface Statement extends Node {
 export interface Expression extends Node {
   expressionNode(): void;
 }
-
-export type parseResult<T> = T | null;
