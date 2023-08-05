@@ -8,8 +8,8 @@ import {
   InfixExpression,
   LetStatement,
   ReturnStatement,
-  parseResult,
 } from "ast";
+import { Maybe } from "utils";
 
 import { ExpressionStatement } from "ast/expression";
 import { Program } from "ast/program";
@@ -95,7 +95,7 @@ export class Parser {
         return this.parseExpressionStatement();
     }
   }
-  parseLetStatement(): parseResult<LetStatement> {
+  parseLetStatement(): Maybe<LetStatement> {
     const letToken = new LetStatement(this.currentToken);
     if (!this.expectPeek(TokenType.IDENT)) {
       return null;
@@ -114,7 +114,7 @@ export class Parser {
     }
     return letToken;
   }
-  parseReturnStatement(): parseResult<ReturnStatement> {
+  parseReturnStatement(): Maybe<ReturnStatement> {
     const returnToken = new ReturnStatement(this.currentToken);
     this.nextToken();
     returnToken.returnValue = this.parseExpression(Precedence.LOWEST);
@@ -123,7 +123,7 @@ export class Parser {
     }
     return returnToken;
   }
-  parseExpressionStatement(): parseResult<ExpressionStatement> {
+  parseExpressionStatement(): Maybe<ExpressionStatement> {
     const expressionStatement = new ExpressionStatement(this.currentToken);
     const expression = this.parseExpression(Precedence.LOWEST);
     if (this.isPeekToken(TokenType.SEMICOLON)) {
@@ -132,7 +132,7 @@ export class Parser {
     expressionStatement.expression = expression;
     return expressionStatement;
   }
-  parseExpression(precedence: Precedence): parseResult<Expression> {
+  parseExpression(precedence: Precedence): Maybe<Expression> {
     const prefix = this.prefixParseFns.get(this.currentToken.type);
     if (prefix === undefined) {
       this.noPrefixParseFnError(this.currentToken.type);
@@ -162,7 +162,7 @@ export class Parser {
     token.value = this.currentToken.literal;
     return token;
   }
-  parseIntegerLiteral(): parseResult<IntegerLiteral> {
+  parseIntegerLiteral(): Maybe<IntegerLiteral> {
     const integerLiteral = new IntegerLiteral(this.currentToken);
     const value = parseInt(this.currentToken.literal);
     if (isNaN(value)) {
@@ -173,7 +173,7 @@ export class Parser {
     integerLiteral.value = value;
     return integerLiteral;
   }
-  parsePrefixExpression(): parseResult<PrefixExpression> {
+  parsePrefixExpression(): Maybe<PrefixExpression> {
     const expressionStatement = new PrefixExpression(
       this.currentToken,
       this.currentToken.literal
@@ -182,7 +182,7 @@ export class Parser {
     expressionStatement.right = this.parseExpression(Precedence.PREFIX);
     return expressionStatement;
   }
-  parseInfixExpression(left: Expression): parseResult<Expression> {
+  parseInfixExpression(left: Expression): Maybe<Expression> {
     const operator = this.currentToken.literal;
     const token = this.currentToken;
     const expression = new InfixExpression(token, operator);
@@ -192,13 +192,13 @@ export class Parser {
     expression.right = this.parseExpression(precedence);
     return expression;
   }
-  parseBoolean(): parseResult<BooleanLiteral> {
+  parseBoolean(): Maybe<BooleanLiteral> {
     return new BooleanLiteral(
       this.currentToken,
       this.isCurrentToken(TokenType.TRUE)
     );
   }
-  parseGroupedExpression(): parseResult<Expression> {
+  parseGroupedExpression(): Maybe<Expression> {
     this.nextToken();
     const expression = this.parseExpression(Precedence.LOWEST);
     if (!this.expectPeek(TokenType.RPAREN)) {
@@ -206,7 +206,7 @@ export class Parser {
     }
     return expression;
   }
-  parseIfExpression(): parseResult<IfExpression> {
+  parseIfExpression(): Maybe<IfExpression> {
     const expression = new IfExpression(this.currentToken);
     if (!this.expectPeek(TokenType.LPAREN)) {
       return null;
@@ -234,7 +234,7 @@ export class Parser {
     }
     return expression;
   }
-  parseBlockStatement(): parseResult<BlockStatement> {
+  parseBlockStatement(): Maybe<BlockStatement> {
     const block = new BlockStatement(this.currentToken);
 
     this.nextToken();
@@ -251,7 +251,7 @@ export class Parser {
     }
     return block;
   }
-  parseFunctionLiteral(): parseResult<FunctionLiteral> {
+  parseFunctionLiteral(): Maybe<FunctionLiteral> {
     const functionLiteral = new FunctionLiteral(this.currentToken);
     if (!this.expectPeek(TokenType.LPAREN)) {
       return null;
@@ -264,7 +264,7 @@ export class Parser {
     return functionLiteral;
   }
 
-  parseFunctionParameters(): parseResult<Identifier[]> {
+  parseFunctionParameters(): Maybe<Identifier[]> {
     const identifiers: Identifier[] = [];
 
     if (this.isPeekToken(TokenType.RPAREN)) {
@@ -289,13 +289,13 @@ export class Parser {
     }
     return identifiers;
   }
-  parseCallExpression(fn: Expression): parseResult<CallExpression> {
+  parseCallExpression(fn: Expression): Maybe<CallExpression> {
     const expression = new CallExpression(this.currentToken);
     expression.function = fn;
     expression.arguments = this.parseCallArguments();
     return expression;
   }
-  parseCallArguments(): parseResult<Expression[]> {
+  parseCallArguments(): Maybe<Expression[]> {
     const args: Expression[] = [];
 
     if (this.isPeekToken(TokenType.RPAREN)) {
