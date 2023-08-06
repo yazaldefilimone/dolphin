@@ -34,13 +34,13 @@ export function startReadEvalPrintLoop() {
     });
   }
   console.log("Welcome!");
+  console.log("The Dolphin Programming Language!");
+
   repl();
 }
 
 function printError(errorHandler: ErrorHandler) {
   console.log("Woops! We ran into some dolphin business here!");
   console.log(" parser errors:");
-  errorHandler
-    .getErrorsInString()
-    .forEach((error) => console.log(`\t${error}`, "\n"));
+  errorHandler.getErrorsInString().forEach((error) => console.log(`\t${error}`, "\n"));
 }
