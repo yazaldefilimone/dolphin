@@ -1,6 +1,6 @@
 import { BaseObject, objectType } from "evaluator/object";
 
-export class Boolean implements BaseObject<boolean> {
+export class InternalBoolean implements BaseObject<boolean> {
   private _value: boolean;
   constructor(value: boolean) {
     this._value = value;
