@@ -3,6 +3,7 @@ import { stdin, stdout } from "node:process";
 
 import { Lexer } from "lexer";
 import { ErrorHandler, Parser } from "parser";
+import { Evaluator } from "evaluator";
 
 const ScannerClose = {
   exit: "exit",
@@ -27,7 +28,8 @@ export function startReadEvalPrintLoop() {
         printError(parser.errorHandler);
         repl();
       }
-      console.log(program.toString());
+      const evaluate = Evaluator(program);
+      if (evaluate) console.log(evaluate.inspect(), "\n");
       repl();
     });
   }
