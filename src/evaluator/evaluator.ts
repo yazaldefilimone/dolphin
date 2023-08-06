@@ -7,8 +7,15 @@ import {
   Program,
   ExpressionStatement,
   IntegerLiteral,
+  BooleanLiteral,
 } from "ast";
-import { BaseObject, Integer } from "evaluator/object";
+import {
+  BaseObject,
+  InternalBoolean,
+  Integer,
+  internal,
+} from "evaluator/object";
+
 import { Maybe } from "utils";
 
 export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
@@ -20,6 +27,8 @@ export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
       return Evaluator((node as ExpressionStatement).expression);
     case ExpressionKind.INTEGER:
       return new Integer((node as IntegerLiteral).value);
+    case ExpressionKind.BOOLEAN:
+      return nativeBoolToBooleanObject((node as BooleanLiteral).value);
     default:
       return null;
   }
@@ -31,4 +40,8 @@ function evaluatorStatements(statements: Statement[]): Maybe<BaseObject> {
     result = Evaluator(statement);
   }
   return result;
+}
+
+function nativeBoolToBooleanObject(input: boolean): InternalBoolean {
+  return input ? internal.TRUE : internal.FALSE;
 }
