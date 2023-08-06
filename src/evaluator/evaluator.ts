@@ -5,13 +5,11 @@ import {
   ExpressionKind,
   Statement,
   Program,
-  Expression,
   ExpressionStatement,
   IntegerLiteral,
 } from "ast";
-import { BaseObject } from "evaluator/object";
+import { BaseObject, Integer } from "evaluator/object";
 import { Maybe } from "utils";
-import { Integer } from "./object/integer";
 
 export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
   if (node === null) return null;
