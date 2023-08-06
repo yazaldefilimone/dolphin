@@ -19,4 +19,21 @@ describe("Evaluator", () => {
       expect(evaluated?.value).toEqual(tt.expected);
     });
   });
+  it("evaluator integer with prefix expression", () => {
+    const tests = [
+      {
+        input: "-40",
+        expected: -40,
+      },
+      {
+        input: "+20",
+        expected: +20,
+      },
+    ];
+
+    tests.forEach((tt) => {
+      const evaluated = makeSut(tt.input);
+      expect(evaluated?.value).toEqual(tt.expected);
+    });
+  });
 });
