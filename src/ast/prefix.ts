@@ -4,7 +4,7 @@ import { Maybe } from "utils";
 
 export class PrefixExpression implements Expression {
   private token: Token;
-  private operator: string;
+  operator: string;
   right: Maybe<Expression> = null;
   kind: ExpressionKind;
   constructor(token: Token, operator: string) {
