@@ -48,4 +48,38 @@ describe("Evaluator", () => {
       expect(evaluated?.value).toEqual(test.expected);
     });
   });
+
+  it("evaluate complexity infix expression", () => {
+    const tests = [
+      {
+        input: "1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10",
+        expected: 55,
+      },
+      {
+        input: "1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10",
+        expected: 3628800,
+      },
+      {
+        input: "2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2",
+        expected: 1024,
+      },
+      {
+        input: "5 * 2 + 10",
+        expected: 20,
+      },
+      {
+        input: "4 - (5 + 2) * 10",
+        expected: -66,
+      },
+      {
+        input: "-50 + (100 -50)",
+        expected: 0,
+      },
+    ];
+    tests.forEach((test) => {
+      const evaluated = makeSut<number>(test.input);
+      expect(evaluated).not.toBeNull();
+      expect(evaluated?.value).toEqual(test.expected);
+    });
+  });
 });
