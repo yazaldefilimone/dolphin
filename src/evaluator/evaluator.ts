@@ -10,6 +10,7 @@ import {
   BooleanLiteral,
   PrefixExpression,
   InfixExpression,
+  IfExpression,
 } from "ast";
 
 import { BaseObject, InternalBoolean, Integer, internal, objectType } from "evaluator/object";
@@ -17,7 +18,7 @@ import { BaseObject, InternalBoolean, Integer, internal, objectType } from "eval
 import { Maybe } from "utils";
 
 export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
-  if (node === null) return null;
+  if (node === null) return internal.NULL;
   switch (node.kind) {
     case ProgramKind.program:
       return evaluatorStatements((node as Program).statements);
@@ -30,15 +31,21 @@ export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
     case ExpressionKind.PREFIX:
       const prefixNode = node as PrefixExpression;
       const prefixRight = Evaluator(prefixNode.right);
-      if (prefixRight === null) return null;
+      if (prefixRight === null) return internal.NULL;
       return evaluatorPrefixExpression(prefixNode.operator, prefixRight);
     case ExpressionKind.INFIX:
       const infix = node as InfixExpression;
       const infixLeft = Evaluator(infix.left);
       const infixRight = Evaluator(infix.right);
       return evalIntegerInfixExpression(infixLeft, infix.operator, infixRight);
+    case ExpressionKind.IF:
+      const ifNode = node as IfExpression;
+      return evalIfExpression(ifNode);
+    case StatementKind.BLOCK:
+      const blockNode = node as Program;
+      return evaluatorStatements(blockNode.statements);
     default:
-      return null;
+      return internal.NULL;
   }
 }
 
@@ -118,12 +125,34 @@ function evalBooleanInfixExpression(left: Maybe<BaseObject>, op: string, right: 
   }
 }
 
+function evalIfExpression(ifNode: IfExpression): Maybe<BaseObject> {
+  const condition = Evaluator(ifNode.condition);
+  if (isTruthy(condition)) {
+    return Evaluator(ifNode.consequence);
+  }
+  return Evaluator(ifNode.alternative);
+}
+
 function isExpectNode(node: Maybe<BaseObject>, expectType: objectType): boolean {
   if (!isObject(node)) return false;
   return node?.type() == expectType;
 }
 function isObject(node: Maybe<BaseObject>): boolean {
   return node !== null;
+}
+function isTruthy(node: Maybe<BaseObject>): boolean {
+  switch (node) {
+    case internal.TRUE:
+      return true;
+    case internal.FALSE:
+      return false;
+    case internal.NULL:
+      return false;
+    case null:
+      return false;
+    default:
+      return true;
+  }
 }
 function nativeBooleanObject(input: boolean): InternalBoolean {
   return input ? internal.TRUE : internal.FALSE;
