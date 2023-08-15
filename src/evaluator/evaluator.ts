@@ -11,6 +11,7 @@ import {
   PrefixExpression,
   InfixExpression,
 } from "ast";
+
 import { BaseObject, InternalBoolean, Integer, internal, objectType } from "evaluator/object";
 
 import { Maybe } from "utils";
@@ -25,7 +26,7 @@ export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
     case ExpressionKind.INTEGER:
       return new Integer((node as IntegerLiteral).value);
     case ExpressionKind.BOOLEAN:
-      return nativeBoolToBooleanObject((node as BooleanLiteral).value);
+      return nativeBooleanObject((node as BooleanLiteral).value);
     case ExpressionKind.PREFIX:
       const prefixNode = node as PrefixExpression;
       const prefixRight = Evaluator(prefixNode.right);
@@ -35,7 +36,7 @@ export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
       const infix = node as InfixExpression;
       const infixLeft = Evaluator(infix.left);
       const infixRight = Evaluator(infix.right);
-      return evaluatorInfixExpression(infixLeft, infix.operator, infixRight);
+      return evalIntegerInfixExpression(infixLeft, infix.operator, infixRight);
     default:
       return null;
   }
@@ -51,15 +52,15 @@ function evaluatorStatements(statements: Statement[]): Maybe<BaseObject> {
 function evaluatorPrefixExpression(operator: string, right: BaseObject): Maybe<BaseObject> {
   switch (operator) {
     case "!":
-      return evaluatorBangOperatorExpression(right);
+      return evalBangOperatorExpression(right);
     case "-":
-      return evaluatorMinusOperatorExpression(right);
+      return evalMinusOperatorExpression(right);
     default:
       return null;
   }
 }
 
-function evaluatorMinusOperatorExpression(right: BaseObject<any>): Maybe<BaseObject> {
+function evalMinusOperatorExpression(right: BaseObject<any>): Maybe<BaseObject> {
   if (right.type() !== objectType.INTEGER) {
     return null;
   }
@@ -67,7 +68,7 @@ function evaluatorMinusOperatorExpression(right: BaseObject<any>): Maybe<BaseObj
   return new Integer(-value);
 }
 
-function evaluatorBangOperatorExpression(right: BaseObject): BaseObject {
+function evalBangOperatorExpression(right: BaseObject): BaseObject {
   switch (right.value) {
     case internal.TRUE.value:
       return internal.FALSE;
@@ -80,7 +81,7 @@ function evaluatorBangOperatorExpression(right: BaseObject): BaseObject {
   }
 }
 
-function evaluatorInfixExpression(left: Maybe<BaseObject>, op: string, right: Maybe<BaseObject>): Maybe<BaseObject> {
+function evalIntegerInfixExpression(left: Maybe<BaseObject>, op: string, right: Maybe<BaseObject>): Maybe<BaseObject> {
   if (!isObject(left) || !isObject(right)) {
     return null;
   }
@@ -95,14 +96,23 @@ function evaluatorInfixExpression(left: Maybe<BaseObject>, op: string, right: Ma
       return new Integer(l.value * r.value);
     case "-":
       return new Integer(l.value - r.value);
+    default:
+      return evalBooleanInfixExpression(left, op, right);
+  }
+}
+
+function evalBooleanInfixExpression(left: Maybe<BaseObject>, op: string, right: Maybe<BaseObject>): Maybe<BaseObject> {
+  const l = left as InternalBoolean;
+  const r = right as InternalBoolean;
+  switch (op) {
     case "<":
-      return nativeBoolToBooleanObject(l.value < r.value);
+      return nativeBooleanObject(l.value < r.value);
     case ">":
-      return nativeBoolToBooleanObject(l.value > r.value);
+      return nativeBooleanObject(l.value > r.value);
     case "==":
-      return nativeBoolToBooleanObject(l.value === r.value);
+      return nativeBooleanObject(l.value === r.value);
     case "!=":
-      return nativeBoolToBooleanObject(l.value !== r.value);
+      return nativeBooleanObject(l.value !== r.value);
     default:
       return null;
   }
@@ -115,6 +125,6 @@ function isExpectNode(node: Maybe<BaseObject>, expectType: objectType): boolean 
 function isObject(node: Maybe<BaseObject>): boolean {
   return node !== null;
 }
-function nativeBoolToBooleanObject(input: boolean): InternalBoolean {
+function nativeBooleanObject(input: boolean): InternalBoolean {
   return input ? internal.TRUE : internal.FALSE;
 }
