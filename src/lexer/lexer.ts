@@ -22,10 +22,7 @@ export class Lexer {
         let storeAssignAfterCharacter = this.currentCharacter;
         if (peekedAssignCharacter == "=") {
           this.readCharacter();
-          const token = this.createToken(
-            TokenType.EQ,
-            storeAssignAfterCharacter + this.currentCharacter
-          );
+          const token = this.createToken(TokenType.EQ, storeAssignAfterCharacter + this.currentCharacter);
           return token;
         }
         return this.createToken(TokenType.ASSIGN, "=");
@@ -38,10 +35,7 @@ export class Lexer {
         let storeBangAfterCharacter = this.currentCharacter;
         if (peekedBangCharacter == "=") {
           this.readCharacter();
-          const token = this.createToken(
-            TokenType.NOT_EQ,
-            storeBangAfterCharacter + this.currentCharacter
-          );
+          const token = this.createToken(TokenType.NOT_EQ, storeBangAfterCharacter + this.currentCharacter);
           return token;
         }
         return this.createToken(TokenType.BANG, "!");
@@ -65,8 +59,6 @@ export class Lexer {
         return this.createToken(TokenType.RPAREN, ")");
       case ",":
         return this.createToken(TokenType.COMMA, ",");
-      case "+":
-        return this.createToken(TokenType.PLUS, "+");
       case "":
         return this.createToken(TokenType.EOF, "");
       default:
