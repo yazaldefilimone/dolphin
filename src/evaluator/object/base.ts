@@ -1,6 +1,7 @@
 export enum objectType {
   INTEGER = "INTEGER",
   BOOLEAN = "BOOLEAN",
+  RETURN = "BOOLEAN",
   NULL = "NULL",
 }
 export interface BaseObject<T = unknown> {
