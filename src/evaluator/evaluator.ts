@@ -11,11 +11,13 @@ import {
   PrefixExpression,
   InfixExpression,
   IfExpression,
+  ReturnStatement,
 } from "ast";
 
-import { BaseObject, InternalBoolean, Integer, internal, objectType } from "evaluator/object";
+import { BaseObject, InternalBoolean, Integer, internal, EBaseObject } from "evaluator/object";
 
 import { Maybe } from "utils";
+import { ReturnObject } from "./object/return";
 
 export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
   if (node === null) return internal.NULL;
@@ -44,6 +46,11 @@ export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
     case StatementKind.BLOCK:
       const blockNode = node as Program;
       return evaluatorStatements(blockNode.statements);
+    case StatementKind.RETURN:
+      const rNode = node as ReturnStatement;
+      const returnValue = Evaluator(rNode.returnValue);
+      if (returnValue === null) return internal.NULL;
+      return new ReturnObject(returnValue);
     default:
       return internal.NULL;
   }
@@ -54,6 +61,7 @@ function evaluatorStatements(statements: Statement[]): Maybe<BaseObject> {
   for (const statement of statements) {
     result = Evaluator(statement);
   }
+  if (result === null) return internal.NULL;
   return result;
 }
 function evaluatorPrefixExpression(operator: string, right: BaseObject): Maybe<BaseObject> {
@@ -68,7 +76,7 @@ function evaluatorPrefixExpression(operator: string, right: BaseObject): Maybe<B
 }
 
 function evalMinusOperatorExpression(right: BaseObject<any>): Maybe<BaseObject> {
-  if (right.type() !== objectType.INTEGER) {
+  if (right.type() !== EBaseObject.INTEGER) {
     return null;
   }
   const value = (right as unknown as IntegerLiteral).value;
@@ -133,7 +141,7 @@ function evalIfExpression(ifNode: IfExpression): Maybe<BaseObject> {
   return Evaluator(ifNode.alternative);
 }
 
-function isExpectNode(node: Maybe<BaseObject>, expectType: objectType): boolean {
+function isExpectNode(node: Maybe<BaseObject>, expectType: EBaseObject): boolean {
   if (!isObject(node)) return false;
   return node?.type() == expectType;
 }
