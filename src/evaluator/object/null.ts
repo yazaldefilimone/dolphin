@@ -1,8 +1,8 @@
-import { BaseObject, objectType } from "evaluator/object";
+import { BaseObject, EBaseObject } from "evaluator/object";
 
 export class InternalNull implements BaseObject<null> {
-  type(): objectType {
-    return objectType.NULL;
+  type(): EBaseObject {
+    return EBaseObject.NULL;
   }
   inspect(): string {
     return "null";

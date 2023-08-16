@@ -1,11 +1,11 @@
-export enum objectType {
+export enum EBaseObject {
   INTEGER = "INTEGER",
   BOOLEAN = "BOOLEAN",
-  RETURN = "BOOLEAN",
+  RETURN = "RETURN",
   NULL = "NULL",
 }
 export interface BaseObject<T = unknown> {
-  type(): objectType;
+  type(): EBaseObject;
   inspect(): string;
   get value(): T;
 }

@@ -1,4 +1,4 @@
-import { BaseObject, objectType } from "evaluator/object";
+import { BaseObject, EBaseObject } from "evaluator/object";
 
 export class Integer implements BaseObject<number> {
   private _value: number;
@@ -6,8 +6,8 @@ export class Integer implements BaseObject<number> {
     this._value = value;
   }
 
-  type(): objectType {
-    return objectType.INTEGER;
+  type(): EBaseObject {
+    return EBaseObject.INTEGER;
   }
   inspect(): string {
     return this._value.toString();
