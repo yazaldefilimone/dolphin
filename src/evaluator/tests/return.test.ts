@@ -26,4 +26,39 @@ describe("Evaluator", () => {
       expect(evaluated?.value).toEqual(tt.expected);
     });
   });
+  it("return inside of if", () => {
+    const tests = [
+      {
+        input: `
+        if (10 > 1) {
+          if (10 > 1) {
+            return 10; 
+          }
+         return -1; 
+        }`,
+        expected: -1,
+      },
+      {
+        input: `
+        if (10 > 1) { 
+          if (10 < 1) {
+             return 10; 
+          } 
+          return 1; 
+        } 
+        return 1;
+      `,
+        expected: 1,
+      },
+    ];
+
+    tests.forEach((tt) => {
+      tests.forEach((tt) => {
+        const evaluated = makeSut(tt.input);
+        expect(evaluated).not.toBeNull();
+        console.log(evaluated?.inspect());
+        expect(evaluated?.value).toEqual(tt.expected);
+      });
+    });
+  });
 });
