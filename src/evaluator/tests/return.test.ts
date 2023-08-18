@@ -10,7 +10,7 @@ describe("Evaluator", () => {
       },
 
       {
-        input: "return 2 * 5;",
+        input: "return 2 * 5; 8;",
         expected: 10,
       },
       {
@@ -30,25 +30,27 @@ describe("Evaluator", () => {
     const tests = [
       {
         input: `
-        if (10 > 1) {
-          if (10 > 1) {
-            return 10; 
+        if (1 == 1) {
+          if (1 != 1) {
+            return 10;
           }
-         return -1; 
-        }`,
-        expected: -1,
+         return 100;
+        }
+        return 1000;
+        `,
+        expected: 100,
       },
       {
         input: `
         if (10 > 1) { 
-          if (10 < 1) {
+          if (10 > 1) {
              return 10; 
           } 
           return 1; 
         } 
         return 1;
       `,
-        expected: 1,
+        expected: 10,
       },
     ];
 
