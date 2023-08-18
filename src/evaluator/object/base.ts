@@ -3,6 +3,7 @@ export enum EBaseObject {
   BOOLEAN = "BOOLEAN",
   RETURN = "RETURN",
   NULL = "NULL",
+  ERROR = "ERROR",
 }
 export interface BaseObject<T = unknown> {
   type(): EBaseObject;
