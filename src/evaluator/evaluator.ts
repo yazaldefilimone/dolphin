@@ -14,10 +14,11 @@ import {
   ReturnStatement,
 } from "ast";
 
-import { BaseObject, InternalBoolean, Integer, internal, EBaseObject } from "evaluator/object";
+import { BaseObject, InternalBoolean, Integer, internal, EBaseObject, ReturnObject } from "evaluator/object";
 
 import { Maybe } from "utils";
-import { ReturnObject } from "./object/return";
+import { parseTwoObjectToString, typeMismatchError, unknownIdentifierError, unknownOperatorError } from "./errors";
+import { verifyPermission } from "./permissions";
 
 export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
   if (node === null) return internal.NULL;
@@ -36,7 +37,8 @@ export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
       const prefixNode = node as PrefixExpression;
       const prefixRight = Evaluator(prefixNode.right);
       if (prefixRight === null) return internal.NULL;
-      return evaluatorPrefixExpression(prefixNode.operator, prefixRight);
+      if (isExpectObject(prefixRight, EBaseObject.ERROR)) return prefixRight;
+      return evalPrefixExpression(prefixNode.operator, prefixRight);
     case ExpressionKind.INFIX:
       const infix = node as InfixExpression;
       const infixLeft = Evaluator(infix.left);
@@ -54,7 +56,7 @@ export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
       if (returnValue === null) return internal.NULL;
       return new ReturnObject(returnValue);
     default:
-      return internal.NULL;
+      return unknownIdentifierError(node.kind);
   }
 }
 
@@ -66,20 +68,20 @@ function evaluatorStatements(statements: Statement[]): Maybe<BaseObject> {
   if (result === null) return internal.NULL;
   return result;
 }
-function evaluatorPrefixExpression(operator: string, right: BaseObject): Maybe<BaseObject> {
+function evalPrefixExpression(operator: string, right: BaseObject): Maybe<BaseObject> {
   switch (operator) {
     case "!":
       return evalBangOperatorExpression(right);
     case "-":
       return evalMinusOperatorExpression(right);
     default:
-      return null;
+      return unknownOperatorError(`${operator}${right.type()}`);
   }
 }
 
 function evalMinusOperatorExpression(right: BaseObject<any>): Maybe<BaseObject> {
-  if (right.type() !== EBaseObject.INTEGER) {
-    return null;
+  if (!isExpectObject(right, EBaseObject.INTEGER)) {
+    return unknownOperatorError(`-${right.type()}`);
   }
   const value = (right as unknown as IntegerLiteral).value;
   return new Integer(-value);
@@ -99,26 +101,36 @@ function evalBangOperatorExpression(right: BaseObject): BaseObject {
 }
 
 function evalIntegerInfixExpression(left: Maybe<BaseObject>, op: string, right: Maybe<BaseObject>): Maybe<BaseObject> {
-  if (!isObject(left) || !isObject(right)) {
-    return null;
+  const leftType = left ?? internal.NULL;
+  const rightType = right ?? internal.NULL;
+  if (!isEqual(left, right)) {
+    return typeMismatchError(leftType, rightType, op);
   }
-  const l = left as BaseObject<number>;
-  const r = right as BaseObject<number>;
+  if (!verifyPermission(op, leftType.type()) && !verifyPermission(op, rightType.type())) {
+    return unknownOperatorError(parseTwoObjectToString(leftType.type(), rightType.type(), op));
+  }
+  const leftInteger = left as BaseObject<number>;
+  const rightInteger = right as BaseObject<number>;
   switch (op) {
     case "+":
-      return new Integer(l.value + r.value);
+      return new Integer(leftInteger.value + rightInteger.value);
     case "/":
-      return new Integer(l.value / r.value);
+      return new Integer(leftInteger.value / rightInteger.value);
     case "*":
-      return new Integer(l.value * r.value);
+      return new Integer(leftInteger.value * rightInteger.value);
     case "-":
-      return new Integer(l.value - r.value);
+      return new Integer(leftInteger.value - rightInteger.value);
     default:
       return evalBooleanInfixExpression(left, op, right);
   }
 }
 
 function evalBooleanInfixExpression(left: Maybe<BaseObject>, op: string, right: Maybe<BaseObject>): Maybe<BaseObject> {
+  if (!isEqual(left, right)) {
+    const leftType = left ?? internal.NULL;
+    const rightType = right ?? internal.NULL;
+    return typeMismatchError(leftType, rightType, op);
+  }
   const l = left as InternalBoolean;
   const r = right as InternalBoolean;
   switch (op) {
@@ -131,7 +143,9 @@ function evalBooleanInfixExpression(left: Maybe<BaseObject>, op: string, right: 
     case "!=":
       return nativeBooleanObject(l.value !== r.value);
     default:
-      return null;
+      const leftType = left?.type() ?? internal.NULL.type();
+      const rightType = right?.type() ?? internal.NULL.type();
+      return unknownOperatorError(parseTwoObjectToString(leftType, rightType, op));
   }
 }
 
@@ -147,30 +161,45 @@ function evalProgram(program: Program): Maybe<BaseObject> {
   let result: Maybe<BaseObject> = null;
   for (const statement of program.statements) {
     result = Evaluator(statement);
-    if (isExpectNode(result, EBaseObject.RETURN)) {
+    if (isExpectObject(result, EBaseObject.RETURN)) {
+      return result;
+    }
+
+    if (isExpectObject(result, EBaseObject.ERROR)) {
       return result;
     }
   }
   return result;
 }
 
-function isExpectNode(node: Maybe<BaseObject>, expectType: EBaseObject): boolean {
-  if (!isObject(node)) return false;
-  return node?.type() == expectType;
+function isExpectObject(object: Maybe<BaseObject>, expectType: EBaseObject): boolean {
+  if (!isObject(object)) return false;
+  return object?.type() == expectType;
 }
-function isObject(node: Maybe<BaseObject>): boolean {
-  return node !== null;
+function isEqual(objectLeft: Maybe<BaseObject>, objectRight: Maybe<BaseObject>): boolean {
+  if (!isObject(objectLeft) || !isObject(objectRight)) return false;
+  return objectLeft?.type() == objectRight?.type();
 }
-function isTruthy(node: Maybe<BaseObject>): boolean {
-  switch (node) {
-    case internal.TRUE:
-      return true;
+
+function isObject(object: Maybe<BaseObject>): boolean {
+  return object !== null;
+}
+function isBreakObject(object: Maybe<BaseObject>): boolean {
+  if (!isObject(object)) return false;
+  if (!isExpectObject(object, EBaseObject.RETURN)) return true;
+  if (!isExpectObject(object, EBaseObject.ERROR)) return true;
+
+  if (object?.type() == EBaseObject.ERROR) return true;
+
+  return object?.type() == EBaseObject.RETURN;
+}
+function isTruthy(object: Maybe<BaseObject>): boolean {
+  switch (object) {
     case internal.FALSE:
-      return false;
     case internal.NULL:
-      return false;
     case null:
       return false;
+    case internal.TRUE:
     default:
       return true;
   }
