@@ -52,6 +52,15 @@ describe("Evaluator", () => {
       `,
         expected: 10,
       },
+      {
+        input: `
+        if (false) { 
+          return 1; 
+        } 
+        return -1;
+      `,
+        expected: -1,
+      },
     ];
 
     tests.forEach((tt) => {
