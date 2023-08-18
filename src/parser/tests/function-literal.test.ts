@@ -6,7 +6,7 @@ import { BlockStatement, ExpressionStatement } from "ast";
 describe("Parser", () => {
   describe("parseProgram", () => {
     it("parse function literal", () => {
-      let code = "fn(x, y) { x + y; }";
+      const code = "fn(x, y) { x + y; }";
       const { program } = makeSut(code, {
         isLogError: true,
         toString: false,
@@ -29,7 +29,7 @@ describe("Parser", () => {
       expect(statement.toString()).toBe("fn(x,y) {(x + y)}");
     });
     it("parse function literal with no parameters", () => {
-      let code = "fn() { x + y; }";
+      const code = "fn() { x + y; }";
       const { program } = makeSut(code, {
         isLogError: true,
         toString: false,
@@ -50,7 +50,7 @@ describe("Parser", () => {
       expect(statement.toString()).toBe("fn() {(x + y)}");
     });
     it("parse function literal with no parameters and body", () => {
-      let code = "fn() {}";
+      const code = "fn() {}";
       const { program } = makeSut(code, {
         isLogError: true,
         toString: false,
@@ -68,7 +68,7 @@ describe("Parser", () => {
       expect(statement.toString()).toBe("fn() {}");
     });
     it("parse function literal with parameters and no body", () => {
-      let code = "fn(x, y) {}";
+      const code = "fn(x, y) {}";
       const { program } = makeSut(code, {
         isLogError: true,
         toString: false,

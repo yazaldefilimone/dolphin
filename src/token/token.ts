@@ -55,7 +55,7 @@ export const keywords: keywordsType = {
 };
 
 export function lookupIdentifier(identifier: string): TokenType {
-  let token = keywords[identifier];
+  const token = keywords[identifier];
   if (token) {
     return token;
   }

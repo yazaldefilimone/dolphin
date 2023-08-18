@@ -74,9 +74,9 @@ export class Parser {
   }
 
   parseProgram(): Program {
-    let program = new Program();
+    const program = new Program();
     while (this.currentToken.type != TokenType.EOF) {
-      let statement = this.parseStatement();
+      const statement = this.parseStatement();
       if (statement != null) {
         program.statements.push(statement);
       }
@@ -101,7 +101,7 @@ export class Parser {
     if (!this.expectPeek(TokenType.IDENT)) {
       return null;
     }
-    let identifier = this.parseIdentifier();
+    const identifier = this.parseIdentifier();
     letToken.name = identifier;
     if (!this.expectPeek(TokenType.ASSIGN)) {
       return null;
@@ -145,7 +145,7 @@ export class Parser {
       !this.isPeekToken(this.currentToken.type) &&
       precedence < this.peekPrecedence()
     ) {
-      let infix = this.infixParseFns.get(this.peekToken.type);
+      const infix = this.infixParseFns.get(this.peekToken.type);
       if (infix === undefined) {
         return leftExpression;
       }

@@ -4,7 +4,7 @@ import { Lexer } from "lexer";
 
 describe("Lexer", () => {
   it("should be return current token of symbols", () => {
-    let code = `
+    const code = `
     let five = 5;
     let ten = 10;
     let add = fn(x, y) {
@@ -21,7 +21,7 @@ describe("Lexer", () => {
     10 == 10;
     10 != 9;
 `;
-    let tests = [
+    const tests = [
       new Token(TokenType.LET, "let"),
       new Token(TokenType.IDENT, "five"),
       new Token(TokenType.ASSIGN, "="),
@@ -98,9 +98,9 @@ describe("Lexer", () => {
       new Token(TokenType.EOF, ""),
     ];
 
-    let lexer = new Lexer(code);
+    const lexer = new Lexer(code);
     tests.forEach((element) => {
-      let token = lexer.nextToken();
+      const token = lexer.nextToken();
       expect(token).instanceof(Token);
       expect(token.type).toEqual(element.type);
       expect(token.literal).toEqual(element.literal);

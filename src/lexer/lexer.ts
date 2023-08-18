@@ -19,7 +19,7 @@ export class Lexer {
     switch (this.currentCharacter) {
       case "=":
         const peekedAssignCharacter = this.peekCharacter();
-        let storeAssignAfterCharacter = this.currentCharacter;
+        const storeAssignAfterCharacter = this.currentCharacter;
         if (peekedAssignCharacter == "=") {
           this.readCharacter();
           const token = this.createToken(TokenType.EQ, storeAssignAfterCharacter + this.currentCharacter);
@@ -32,7 +32,7 @@ export class Lexer {
         return this.createToken(TokenType.MINUS, "-");
       case "!":
         const peekedBangCharacter = this.peekCharacter();
-        let storeBangAfterCharacter = this.currentCharacter;
+        const storeBangAfterCharacter = this.currentCharacter;
         if (peekedBangCharacter == "=") {
           this.readCharacter();
           const token = this.createToken(TokenType.NOT_EQ, storeBangAfterCharacter + this.currentCharacter);
@@ -63,15 +63,15 @@ export class Lexer {
         return this.createToken(TokenType.EOF, "");
       default:
         if (this.isLetter(this.currentCharacter)) {
-          let identifier = this.readIdentifier();
-          let type = lookupIdentifier(identifier);
+          const identifier = this.readIdentifier();
+          const type = lookupIdentifier(identifier);
           const token = new Token(type, identifier);
           return token;
         }
 
         if (this.isDigit(this.currentCharacter)) {
-          let type = TokenType.INT;
-          let identifier = this.readNumber();
+          const type = TokenType.INT;
+          const identifier = this.readNumber();
           const token = new Token(type, identifier);
           return token;
         }
@@ -105,7 +105,7 @@ export class Lexer {
   }
 
   private readIdentifier(): string {
-    let currentPosition = this.position;
+    const currentPosition = this.position;
     while (this.isLetter(this.currentCharacter)) {
       this.readCharacter();
     }
@@ -113,7 +113,7 @@ export class Lexer {
   }
 
   private readNumber(): string {
-    let currentPosition = this.position;
+    const currentPosition = this.position;
     while (this.isDigit(this.currentCharacter)) {
       this.readCharacter();
     }
@@ -129,8 +129,8 @@ export class Lexer {
   }
 
   private isLetter(character: string): boolean {
-    let isCharLoweCase = "a" <= character && character <= "z";
-    let isCharUpperCase = "A" <= character && character <= "Z";
+    const isCharLoweCase = "a" <= character && character <= "z";
+    const isCharUpperCase = "A" <= character && character <= "Z";
     return Boolean(isCharLoweCase || isCharUpperCase || character === "_");
   }
 

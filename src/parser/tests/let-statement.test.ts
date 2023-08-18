@@ -26,7 +26,7 @@ describe("Parser", () => {
       expect(program.statements.length).toBe(3);
       tests.forEach((test, index) => {
         const statement: any = program.statements[index];
-        let identifier = statement.name;
+        const identifier = statement.name;
         expect(statement.tokenLiteral()).toBe("let");
         expect(identifier.tokenLiteral()).toBe(test.expectedIdentifier);
         expect(identifier.token.type).toBe(TokenType.IDENT);

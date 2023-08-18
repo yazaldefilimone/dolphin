@@ -42,21 +42,21 @@ describe("Evaluator", () => {
       },
       {
         input: `
-        if (10 > 1) { 
+        if (10 > 1) {
           if (10 > 1) {
-             return 10; 
-          } 
-          return 1; 
-        } 
+             return 10;
+          }
+          return 1;
+        }
         return 1;
       `,
         expected: 10,
       },
       {
         input: `
-        if (false) { 
-          return 1; 
-        } 
+        if (false) {
+          return 1;
+        }
         return -1;
       `,
         expected: -1,

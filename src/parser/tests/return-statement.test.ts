@@ -10,7 +10,7 @@ describe("Parser", () => {
     return 10;
     return 993322;
     `;
-      let tests = [
+      const tests = [
         { expectedValue: 5 },
         { expectedValue: 10 },
         { expectedValue: 993322 },
