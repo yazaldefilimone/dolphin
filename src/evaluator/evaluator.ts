@@ -23,7 +23,9 @@ export function Evaluator(node: Maybe<Node>): Maybe<BaseObject> {
   if (node === null) return internal.NULL;
   switch (node.kind) {
     case ProgramKind.program:
-      return evaluatorStatements((node as Program).statements);
+      return evalProgram(node as Program);
+    case StatementKind.BLOCK:
+      return evalProgram(node as Program);
     case StatementKind.EXPRESSION:
       return Evaluator((node as ExpressionStatement).expression);
     case ExpressionKind.INTEGER:
@@ -139,6 +141,17 @@ function evalIfExpression(ifNode: IfExpression): Maybe<BaseObject> {
     return Evaluator(ifNode.consequence);
   }
   return Evaluator(ifNode.alternative);
+}
+
+function evalProgram(program: Program): Maybe<BaseObject> {
+  let result: Maybe<BaseObject> = null;
+  for (const statement of program.statements) {
+    result = Evaluator(statement);
+    if (isExpectNode(result, EBaseObject.RETURN)) {
+      return result;
+    }
+  }
+  return result;
 }
 
 function isExpectNode(node: Maybe<BaseObject>, expectType: EBaseObject): boolean {
