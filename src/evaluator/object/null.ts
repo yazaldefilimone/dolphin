@@ -5,7 +5,7 @@ export class InternalNull implements BaseObject<null> {
     return EBaseObject.NULL;
   }
   inspect(): string {
-    return "null";
+    return "nil";
   }
   get value() {
     return null;
