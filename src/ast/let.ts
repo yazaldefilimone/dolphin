@@ -1,7 +1,7 @@
 import { Token } from "token";
 import { Expression, ProgramKind, Statement, StatementKind } from "./base";
 import { Identifier } from "./identifier";
-import { Maybe } from "utils";
+import { Maybe, concatenationOfString } from "utils";
 
 export class LetStatement implements Statement {
   token: Token;
@@ -21,12 +21,11 @@ export class LetStatement implements Statement {
     throw new Error("Method not implemented.");
   }
   toString(): string {
-    let out_string = this.tokenLiteral().concat(" ");
-    out_string = out_string.concat(this.name.toString());
+    const out_string = concatenationOfString(this.tokenLiteral());
+    out_string.plus([" ", this.name.toString()]);
     if (this.value !== null) {
-      out_string = out_string.concat(" ", "=", " ");
-      out_string = out_string.concat(this.value.toString());
+      out_string.plus([" ", "=", " ", this.value.toString(), ";"]);
     }
-    return out_string.concat(";");
+    return out_string.get();
   }
 }
