@@ -4,6 +4,7 @@ import { stdin, stdout } from "node:process";
 import { Lexer } from "lexer";
 import { ErrorHandler, Parser } from "parser";
 import { Evaluator } from "evaluator";
+import { Environment } from "evaluator/object";
 
 const ScannerClose = {
   exit: "exit",
@@ -17,6 +18,7 @@ export function startReadEvalPrintLoop() {
     input: stdin,
     output: stdout,
   });
+  const env = new Environment();
 
   function repl() {
     scanner.question(">> ", (input) => {
@@ -28,7 +30,7 @@ export function startReadEvalPrintLoop() {
         printError(parser.errorHandler);
         repl();
       }
-      const evaluate = Evaluator(program);
+      const evaluate = Evaluator(program, env);
       if (evaluate) console.log(evaluate.inspect(), "\n");
       repl();
     });
