@@ -8,22 +8,21 @@ function debugPrintError(errors: ErrorHandler) {
 }
 
 function debugPrintErrorInString(errors: ErrorHandler) {
-  errors.getErrorsInString().map((message) => {
-    const error = "Error: " + message.concat("\n");
-    console.log("\x1b[31m%s\x1b[0m", error);
-  });
+  // remove comments if you want debug
+  // errors.getErrorsInString().map((message) => {
+  //   const error = "Error: " + message.concat("\n");
+  //   console.log("\x1b[31m%s\x1b[0m", error);
+  // });
 }
 function debugToString(program: Program) {
-  console.log(program.toString().concat("\n"));
+  // remove comments if you want debug
+  // console.log(program.toString().concat("\n"));
 }
 type debugType = {
   isLogError?: boolean;
   toString?: boolean;
 };
-export const makeSut = (
-  code: string,
-  debug: debugType = { isLogError: false, toString: false }
-) => {
+export const makeSut = (code: string, debug: debugType = { isLogError: false, toString: false }) => {
   const lexer = new Lexer(code);
   const parser = new Parser(lexer);
   const program = parser.parseProgram();
