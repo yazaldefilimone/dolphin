@@ -11,6 +11,9 @@ export function typeMismatchError(left: BaseObject, right: BaseObject, operator:
 export function unknownIdentifierError(name: string): InternalError {
   return new InternalError(`Unknown identifier: ${name}`);
 }
+export function identifierNotFoundError(name: string): InternalError {
+  return new InternalError(`identifier not found: ${name}`);
+}
 
 export function parseTwoObjectToString(left: EBaseObject, right: EBaseObject, operator: string): string {
   if (!left && right) {
