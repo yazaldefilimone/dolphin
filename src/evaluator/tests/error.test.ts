@@ -1,6 +1,6 @@
 import { it, expect, describe } from "vitest";
 import { makeSut } from "./sut";
-import { typeMismatchError, unknownOperatorError } from "evaluator/errors";
+import { typeMismatchError, unknownOperatorError, identifierNotFoundError } from "evaluator/errors";
 import { InternalBoolean, Integer, InternalNull, EBaseObject } from "evaluator/object";
 const default_obj = {
   integer: new Integer(0),
@@ -43,6 +43,10 @@ describe("Evaluator", () => {
                     return 1;
                   }`,
         expected: unknownOperatorError(`${EBaseObject.BOOLEAN} + ${EBaseObject.BOOLEAN}`).inspect(),
+      },
+      {
+        input: `variable_not_defined`,
+        expected: identifierNotFoundError(`variable_not_defined`).inspect(),
       },
     ];
 
