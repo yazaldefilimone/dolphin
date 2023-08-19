@@ -40,7 +40,7 @@ describe("Evaluator", () => {
     tests.forEach((tt) => {
       const out = makeSut(tt.input);
       expect(out).not.toBeNull();
-      expect(out?.inspect()).toEqual(tt.output);
+      expect(out?.value).toEqual(tt.output);
     });
   });
 });
