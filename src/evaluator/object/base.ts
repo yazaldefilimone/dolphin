@@ -4,6 +4,7 @@ export enum EBaseObject {
   RETURN = "RETURN",
   NULL = "NULL",
   ERROR = "ERROR",
+  FUNCTION = "FUNCTION",
 }
 export interface BaseObject<T = unknown> {
   type(): EBaseObject;
