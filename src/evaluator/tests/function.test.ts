@@ -20,4 +20,48 @@ describe("Evaluator", () => {
       expect(fn.body.toString()).toBe("{(x + 1)}");
     });
   });
+
+  it("should evaluate function application", () => {
+    const tests = [
+      {
+        input: `
+          let identity = fn(x) { return x; };
+          identity(5);
+        `,
+        expected: 5,
+      },
+      {
+        input: `
+          let double = fn(x) { x * 2; };
+          double(5);
+        `,
+        expected: 10,
+      },
+      {
+        input: `
+          let add = fn(x, y) { x + y; };
+          add(5, 5);
+        `,
+        expected: 10,
+      },
+      {
+        input: `
+          let add = fn(x, y) { x + y; };
+          add(5 + 5, add(5, 5));
+        `,
+        expected: 20,
+      },
+      {
+        input: `
+          fn(x) { x; }(5);
+        `,
+        expected: 5,
+      },
+    ];
+    tests.forEach((tt) => {
+      const sut = makeSut(tt.input);
+      expect(sut).not.toBeNull();
+      expect(sut?.value).toBe(tt.expected);
+    });
+  });
 });
