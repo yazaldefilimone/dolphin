@@ -11,6 +11,10 @@ export function typeMismatchError(left: BaseObject, right: BaseObject, operator:
 export function unknownIdentifierError(name: string): InternalError {
   return new InternalError(`Unknown identifier: ${name}`);
 }
+
+export function notFunctionError(name: string): InternalError {
+  return new InternalError(`Not a function: ${name}`);
+}
 export function identifierNotFoundError(name: string): InternalError {
   return new InternalError(`identifier not found: ${name}`);
 }
