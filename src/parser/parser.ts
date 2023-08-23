@@ -9,6 +9,7 @@ import {
   LetStatement,
   ReturnStatement,
   Statement,
+  StringLiteral,
 } from "ast";
 import { Maybe } from "utils";
 
@@ -43,15 +44,10 @@ export class Parser {
     this.registerPrefix(TokenType.FALSE, this.parseBoolean.bind(this));
     this.registerPrefix(TokenType.TRUE, this.parseBoolean.bind(this));
     this.registerPrefix(TokenType.MINUS, this.parsePrefixExpression.bind(this));
-    this.registerPrefix(
-      TokenType.LPAREN,
-      this.parseGroupedExpression.bind(this)
-    );
-    this.registerPrefix(
-      TokenType.FUNCTION,
-      this.parseFunctionLiteral.bind(this)
-    );
+    this.registerPrefix(TokenType.LPAREN, this.parseGroupedExpression.bind(this));
+    this.registerPrefix(TokenType.FUNCTION, this.parseFunctionLiteral.bind(this));
     this.registerPrefix(TokenType.IF, this.parseIfExpression.bind(this));
+    this.registerPrefix(TokenType.STRING, this.parseStringLiteral.bind(this));
     // infix registers
     this.registerInfix(TokenType.PLUS, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.LT, this.parseInfixExpression.bind(this));
@@ -59,10 +55,7 @@ export class Parser {
     this.registerInfix(TokenType.MINUS, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.SLASH, this.parseInfixExpression.bind(this));
 
-    this.registerInfix(
-      TokenType.ASTERISK,
-      this.parseInfixExpression.bind(this)
-    );
+    this.registerInfix(TokenType.ASTERISK, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.EQ, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.NOT_EQ, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.LPAREN, this.parseCallExpression.bind(this));
@@ -141,10 +134,7 @@ export class Parser {
     }
     let leftExpression = prefix();
 
-    while (
-      !this.isPeekToken(this.currentToken.type) &&
-      precedence < this.peekPrecedence()
-    ) {
+    while (!this.isPeekToken(this.currentToken.type) && precedence < this.peekPrecedence()) {
       const infix = this.infixParseFns.get(this.peekToken.type);
       if (infix === undefined) {
         return leftExpression;
@@ -175,10 +165,7 @@ export class Parser {
     return integerLiteral;
   }
   parsePrefixExpression(): Maybe<PrefixExpression> {
-    const expressionStatement = new PrefixExpression(
-      this.currentToken,
-      this.currentToken.literal
-    );
+    const expressionStatement = new PrefixExpression(this.currentToken, this.currentToken.literal);
     this.nextToken();
     expressionStatement.right = this.parseExpression(Precedence.PREFIX);
     return expressionStatement;
@@ -194,10 +181,7 @@ export class Parser {
     return expression;
   }
   parseBoolean(): Maybe<BooleanLiteral> {
-    return new BooleanLiteral(
-      this.currentToken,
-      this.isCurrentToken(TokenType.TRUE)
-    );
+    return new BooleanLiteral(this.currentToken, this.isCurrentToken(TokenType.TRUE));
   }
   parseGroupedExpression(): Maybe<Expression> {
     this.nextToken();
@@ -235,15 +219,15 @@ export class Parser {
     }
     return expression;
   }
+  parseStringLiteral(): Maybe<StringLiteral> {
+    return new StringLiteral(this.currentToken, this.currentToken.literal);
+  }
   parseBlockStatement(): Maybe<BlockStatement> {
     const block = new BlockStatement(this.currentToken);
 
     this.nextToken();
 
-    while (
-      !this.isCurrentToken(TokenType.RBRACE) &&
-      !this.isCurrentToken(TokenType.EOF)
-    ) {
+    while (!this.isCurrentToken(TokenType.RBRACE) && !this.isCurrentToken(TokenType.EOF)) {
       const statement = this.parseStatement();
       if (statement !== null) {
         block.statements.push(statement);
