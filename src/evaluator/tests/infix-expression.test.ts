@@ -42,7 +42,6 @@ describe("Evaluator", () => {
       },
     ];
     tests.forEach((test) => {
-      console.log(test.input);
       const evaluated = makeSut<number>(test.input);
       expect(evaluated).not.toBeNull();
       expect(evaluated?.value).toEqual(test.expected);

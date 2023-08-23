@@ -22,7 +22,6 @@ describe("Evaluator", () => {
     tests.forEach((tt) => {
       const evaluated = makeSut(tt.input);
       expect(evaluated).not.toBeNull();
-      console.log(evaluated?.inspect());
       expect(evaluated?.value).toEqual(tt.expected);
     });
   });
@@ -67,7 +66,6 @@ describe("Evaluator", () => {
       tests.forEach((tt) => {
         const evaluated = makeSut(tt.input);
         expect(evaluated).not.toBeNull();
-        console.log(evaluated?.inspect());
         expect(evaluated?.value).toEqual(tt.expected);
       });
     });
