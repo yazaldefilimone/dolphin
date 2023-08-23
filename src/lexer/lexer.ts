@@ -61,6 +61,10 @@ export class Lexer {
         return this.createToken(TokenType.COMMA, ",");
       case "":
         return this.createToken(TokenType.EOF, "");
+      case '"':
+        const literal = this.readString();
+        const token = this.createToken(TokenType.STRING, literal);
+        return token;
       default:
         if (this.isLetter(this.currentCharacter)) {
           const identifier = this.readIdentifier();
@@ -112,6 +116,13 @@ export class Lexer {
     return this.input.substring(currentPosition, this.position);
   }
 
+  private readString(): string {
+    const currentPosition = this.position + 1;
+    do {
+      this.readCharacter();
+    } while (this.currentCharacter != '"' && this.currentCharacter != "");
+    return this.input.substring(currentPosition, this.position);
+  }
   private readNumber(): string {
     const currentPosition = this.position;
     while (this.isDigit(this.currentCharacter)) {
