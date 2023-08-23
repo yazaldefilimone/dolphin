@@ -12,3 +12,4 @@ export * from "./if";
 export * from "./block";
 export * from "./function";
 export * from "./call";
+export * from "./string";
