@@ -3,6 +3,7 @@ export enum EBaseObject {
   BOOLEAN = "BOOLEAN",
   RETURN = "RETURN",
   NULL = "NULL",
+  STRING = "STRING",
   ERROR = "ERROR",
   FUNCTION = "FUNCTION",
 }
