@@ -17,6 +17,7 @@ import {
   FunctionLiteral,
   Expression,
   CallExpression,
+  StringLiteral,
 } from "ast";
 
 import {
@@ -28,6 +29,7 @@ import {
   ReturnObject,
   Environment,
   EnclosedEnvironment,
+  BaseString,
 } from "evaluator/object";
 
 import { Maybe } from "utils";
@@ -53,6 +55,8 @@ export function Evaluator(node: Maybe<Node>, env: Environment): Maybe<BaseObject
       return Evaluator((node as ExpressionStatement).expression, env);
     case ExpressionKind.INTEGER:
       return new Integer((node as IntegerLiteral).value);
+    case ExpressionKind.STRING:
+      return new BaseString((node as StringLiteral).value);
     case ExpressionKind.BOOLEAN:
       return nativeBooleanObject((node as BooleanLiteral).value);
     case ExpressionKind.PREFIX:
@@ -65,7 +69,7 @@ export function Evaluator(node: Maybe<Node>, env: Environment): Maybe<BaseObject
       const infix = node as InfixExpression;
       const infixLeft = Evaluator(infix.left, env);
       const infixRight = Evaluator(infix.right, env);
-      return evalIntegerInfixExpression(infixLeft, infix.operator, infixRight);
+      return evalInfixExpression(infixLeft, infixRight, infix.operator);
     case ExpressionKind.IF:
       const ifNode = node as IfExpression;
       return evalIfExpression(ifNode, env);
@@ -137,19 +141,43 @@ function evalBangOperatorExpression(right: BaseObject): BaseObject {
       return internal.FALSE;
   }
 }
-
-function evalIntegerInfixExpression(left: Maybe<BaseObject>, op: string, right: Maybe<BaseObject>): Maybe<BaseObject> {
+function evalInfixExpression(left: Maybe<BaseObject>, right: Maybe<BaseObject>, operator: string): Maybe<BaseObject> {
   const leftType = left ?? internal.NULL;
   const rightType = right ?? internal.NULL;
   if (!isEqual(left, right)) {
-    return typeMismatchError(leftType, rightType, op);
+    return typeMismatchError(leftType, rightType, operator);
   }
-  if (!verifyPermission(op, leftType.type()) && !verifyPermission(op, rightType.type())) {
-    return unknownOperatorError(parseTwoObjectToString(leftType.type(), rightType.type(), op));
+  if (!verifyPermission(operator, leftType.type()) && !verifyPermission(operator, rightType.type())) {
+    return unknownOperatorError(parseTwoObjectToString(leftType.type(), rightType.type(), operator));
   }
+  if (isExpectObject(left, EBaseObject.STRING) && isExpectObject(right, EBaseObject.STRING)) {
+    return evalStringInfixExpression(left, right, operator);
+  }
+
+  switch (operator) {
+    case "+":
+    case "/":
+    case "*":
+    case "-":
+      return evalIntegerInfixExpression(left, right, operator);
+    case "<":
+    case ">":
+    case "==":
+    case "!=":
+      return evalBooleanInfixExpression(left, right, operator);
+    default:
+      return unknownOperatorError(parseTwoObjectToString(leftType.type(), rightType.type(), operator));
+  }
+}
+
+function evalIntegerInfixExpression(
+  left: Maybe<BaseObject>,
+  right: Maybe<BaseObject>,
+  operator: string
+): Maybe<BaseObject> {
   const leftInteger = left as BaseObject<number>;
   const rightInteger = right as BaseObject<number>;
-  switch (op) {
+  switch (operator) {
     case "+":
       return new Integer(leftInteger.value + rightInteger.value);
     case "/":
@@ -159,19 +187,20 @@ function evalIntegerInfixExpression(left: Maybe<BaseObject>, op: string, right: 
     case "-":
       return new Integer(leftInteger.value - rightInteger.value);
     default:
-      return evalBooleanInfixExpression(left, op, right);
+      const leftType = left?.type() ?? internal.NULL.type();
+      const rightType = right?.type() ?? internal.NULL.type();
+      return unknownOperatorError(parseTwoObjectToString(leftType, rightType, operator));
   }
 }
 
-function evalBooleanInfixExpression(left: Maybe<BaseObject>, op: string, right: Maybe<BaseObject>): Maybe<BaseObject> {
-  if (!isEqual(left, right)) {
-    const leftType = left ?? internal.NULL;
-    const rightType = right ?? internal.NULL;
-    return typeMismatchError(leftType, rightType, op);
-  }
+function evalBooleanInfixExpression(
+  left: Maybe<BaseObject>,
+  right: Maybe<BaseObject>,
+  operator: string
+): Maybe<BaseObject> {
   const l = left as InternalBoolean;
   const r = right as InternalBoolean;
-  switch (op) {
+  switch (operator) {
     case "<":
       return nativeBooleanObject(l.value < r.value);
     case ">":
@@ -183,7 +212,28 @@ function evalBooleanInfixExpression(left: Maybe<BaseObject>, op: string, right: 
     default:
       const leftType = left?.type() ?? internal.NULL.type();
       const rightType = right?.type() ?? internal.NULL.type();
-      return unknownOperatorError(parseTwoObjectToString(leftType, rightType, op));
+      return unknownOperatorError(parseTwoObjectToString(leftType, rightType, operator));
+  }
+}
+
+function evalStringInfixExpression(
+  left: Maybe<BaseObject>,
+  right: Maybe<BaseObject>,
+  operator: string
+): Maybe<BaseObject> {
+  let leftType = left?.type() ?? internal.NULL.type();
+  let rightType = right?.type() ?? internal.NULL.type();
+
+  if (!isExpectObject(left, EBaseObject.STRING) || !isExpectObject(right, EBaseObject.STRING)) {
+    return unknownOperatorError(parseTwoObjectToString(leftType, rightType, operator));
+  }
+  const leftValue = (left as BaseObject<string>).value;
+  const rightValue = (right as BaseObject<string>).value;
+  switch (operator) {
+    case "+":
+      return new BaseString(leftValue + rightValue);
+    default:
+      return unknownOperatorError(parseTwoObjectToString(leftType, rightType, operator));
   }
 }
 
