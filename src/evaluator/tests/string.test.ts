@@ -33,5 +33,52 @@ describe("Evaluator", () => {
         expect(evaluated?.inspect()).toMatch(tt.expected);
       });
     });
+
+    it("should return error when no suporte operator with string", () => {
+      const tests = [
+        {
+          input: `"Hello" -  "World" `,
+          expected: unknownOperatorError("STRING - STRING"),
+        },
+        {
+          input: `"Hello" *  "World"`,
+          expected: unknownOperatorError("STRING * STRING"),
+        },
+        {
+          input: `"Hello" /  "World"`,
+          expected: unknownOperatorError("STRING / STRING"),
+        },
+        {
+          input: `"Hello" >  "World"`,
+          expected: unknownOperatorError("STRING > STRING"),
+        },
+        {
+          input: `"Hello" <  "World"`,
+          expected: unknownOperatorError("STRING < STRING"),
+        },
+        {
+          input: `"Hello" ==  "World"`,
+          expected: unknownOperatorError("STRING == STRING"),
+        },
+        {
+          input: `"Hello" !=  "World"`,
+          expected: unknownOperatorError("STRING != STRING"),
+        },
+        // TODO:
+        // {
+        //   input: `"Hello" >=  "World"`,
+        //   expected: unknownOperatorError("STRING >= STRING"),
+        // },
+        // {
+        //   input: `"Hello" <=  "World"`,
+        //   expected: unknownOperatorError("STRING <= STRING"),
+        // },
+      ];
+      tests.forEach((tt) => {
+        const evaluated = makeSut(tt.input);
+        expect(evaluated).toBeDefined();
+        expect(evaluated?.inspect()).toMatch(tt.expected.inspect());
+      });
+    });
   });
 });
