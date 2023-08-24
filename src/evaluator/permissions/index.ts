@@ -15,7 +15,7 @@ setPermission("<", [EBaseObject.INTEGER, EBaseObject.BOOLEAN]);
 setPermission(">", [EBaseObject.INTEGER, EBaseObject.BOOLEAN]);
 setPermission("==", [EBaseObject.INTEGER, EBaseObject.BOOLEAN]);
 setPermission("!=", [EBaseObject.INTEGER, EBaseObject.BOOLEAN]);
-setPermission("+", [EBaseObject.INTEGER]);
+setPermission("+", [EBaseObject.INTEGER, EBaseObject.STRING]);
 setPermission("-", [EBaseObject.INTEGER]);
 setPermission("*", [EBaseObject.INTEGER]);
 setPermission("/", [EBaseObject.INTEGER]);
