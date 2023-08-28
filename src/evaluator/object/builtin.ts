@@ -30,6 +30,6 @@ const len: BuiltinFunction = (...args: BaseObject<string>[]) => {
   return new Integer(arg?.value.length);
 };
 
-export const keyboardTable: Record<string, Builtin> = {
-  len: new Builtin(len),
-};
+const keyboardTable = new Map<string, Builtin>();
+keyboardTable.set("len", new Builtin(len));
+export { keyboardTable };
