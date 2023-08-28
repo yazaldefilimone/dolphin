@@ -43,6 +43,7 @@ import {
 } from "./errors";
 import { verifyPermission } from "./permissions";
 import { BaseFunction } from "./object/function";
+import { Builtin } from "./object/builtin";
 
 export function Evaluator(node: Maybe<Node>, env: Environment): Maybe<BaseObject> {
   if (node === null) return internal.NULL;
@@ -93,10 +94,10 @@ export function Evaluator(node: Maybe<Node>, env: Environment): Maybe<BaseObject
       const callNode = node as CallExpression;
       const func = Evaluator(callNode.function, env);
       if (isError(func)) return func;
-      const args = evalExpressions(callNode.arguments, env);
+      let args = evalExpressions(callNode.arguments, env);
       if (args.length === 1 && isError(args[0])) return args[0];
       if (args === null || func == null) return internal.NULL;
-      return applyFunction(func, args);
+      return applyFunction(func, args as BaseObject[]);
     default:
       return identifierNotFoundError(node.tokenLiteral());
   }
@@ -262,10 +263,10 @@ function evalProgram(program: Program, env: Environment): Maybe<BaseObject> {
 
 function evalIdentifierExpression(node: Identifier, env: Environment): BaseObject {
   const value = env.getStore(node.value);
-  if (value === null) {
-    return identifierNotFoundError(node.tokenLiteral());
-  }
-  return value;
+  if (value) return value;
+  const builtin = internal.keyboardTable.get(node.value);
+  if (builtin) return builtin;
+  return identifierNotFoundError(node.tokenLiteral());
 }
 
 function evalFunctionExpression(node: FunctionLiteral, env: Environment): BaseObject {
@@ -274,27 +275,32 @@ function evalFunctionExpression(node: FunctionLiteral, env: Environment): BaseOb
 
 function evalExpressions(expressions: Maybe<Expression[]>, env: Environment): Maybe<BaseObject>[] {
   if (expressions === null) return [internal.NULL];
-  let result: Maybe<BaseObject>[] = [];
+  let result: BaseObject[] = [];
   for (const expression of expressions) {
     const object = Evaluator(expression, env);
     if (isError(object)) {
       return [object];
     }
-    result.push(object);
+    object && result.push(object);
   }
   if (result === null) return [internal.NULL];
   return result;
 }
 
-function applyFunction(fn: BaseObject, args: Maybe<BaseObject>[]): Maybe<BaseObject> {
-  if (!isExpectObject(fn, EBaseObject.FUNCTION)) {
-    return notFunctionError(fn.type());
+function applyFunction(fn: BaseObject, args: BaseObject[]): Maybe<BaseObject> {
+  switch (fn.type()) {
+    case EBaseObject.FUNCTION:
+      const baseFunction = fn as BaseFunction;
+      let extendEnv = extendFunctionEnv(baseFunction, args);
+      const evaluateBody = Evaluator(baseFunction.body, extendEnv);
+      // return unwrapReturnValue(evaluateBody);
+      return evaluateBody;
+    case EBaseObject.BUILTIN:
+      const builtin = fn as Builtin;
+      return builtin.value(...args);
+    default:
+      return notFunctionError(fn.type());
   }
-  const baseFunction = fn as BaseFunction;
-  let extendEnv = extendFunctionEnv(baseFunction, args);
-  const evaluateBody = Evaluator(baseFunction.body, extendEnv);
-  // return unwrapReturnValue(evaluateBody);
-  return evaluateBody;
 }
 
 function extendFunctionEnv(fun: BaseFunction, args: Maybe<BaseObject>[]): Environment {
