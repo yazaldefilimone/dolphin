@@ -57,6 +57,10 @@ export class Lexer {
         return this.createToken(TokenType.LPAREN, "(");
       case ")":
         return this.createToken(TokenType.RPAREN, ")");
+      case "[":
+        return this.createToken(TokenType.LBRACKET, "[");
+      case "]":
+        return this.createToken(TokenType.RBRACKET, "]");
       case ",":
         return this.createToken(TokenType.COMMA, ",");
       case "":
