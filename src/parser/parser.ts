@@ -22,6 +22,7 @@ import { prefixParseFn, infixParseFn } from "parser";
 import { IntegerLiteral } from "ast/integer-literal";
 import { PrefixExpression } from "ast";
 import { FunctionLiteral } from "ast/function";
+import { ArrayLiteral } from "ast/array";
 
 export class Parser {
   private lexer: Lexer;
@@ -38,6 +39,7 @@ export class Parser {
     this.prefixParseFns = new Map();
     this.infixParseFns = new Map();
     // prefix registers
+    this.registerPrefix(TokenType.LBRACKET, this.parseArrayLiteral.bind(this));
     this.registerPrefix(TokenType.IDENT, this.parseIdentifier.bind(this));
     this.registerPrefix(TokenType.INT, this.parseIntegerLiteral.bind(this));
     this.registerPrefix(TokenType.BANG, this.parsePrefixExpression.bind(this));
@@ -191,6 +193,12 @@ export class Parser {
     }
     return expression;
   }
+  parseArrayLiteral(): Maybe<Expression> {
+    const list = this.parseExpressionList(TokenType.RBRACKET);
+    const array = new ArrayLiteral(this.currentToken, list);
+    this.nextToken();
+    return array;
+  }
   parseIfExpression(): Maybe<IfExpression> {
     const expression = new IfExpression(this.currentToken);
     if (!this.expectPeek(TokenType.LPAREN)) {
@@ -222,6 +230,7 @@ export class Parser {
   parseStringLiteral(): Maybe<StringLiteral> {
     return new StringLiteral(this.currentToken, this.currentToken.literal);
   }
+
   parseBlockStatement(): Maybe<BlockStatement> {
     const block = new BlockStatement(this.currentToken);
 
@@ -277,13 +286,13 @@ export class Parser {
   parseCallExpression(fn: Expression): Maybe<CallExpression> {
     const expression = new CallExpression(this.currentToken);
     expression.function = fn;
-    expression.arguments = this.parseCallArguments();
+    expression.arguments = this.parseCallArguments(TokenType.RPAREN);
     return expression;
   }
-  parseCallArguments(): Maybe<Expression[]> {
+  parseCallArguments(end: TokenType): Maybe<Expression[]> {
     const args: Expression[] = [];
 
-    if (this.isPeekToken(TokenType.RPAREN)) {
+    if (this.isPeekToken(end)) {
       this.nextToken();
       return args;
     }
@@ -302,10 +311,32 @@ export class Parser {
       }
     }
 
-    if (!this.expectPeek(TokenType.RPAREN)) {
+    if (!this.expectPeek(end)) {
       return null;
     }
     return args;
+  }
+
+  parseExpressionList(end: TokenType): Maybe<Expression[]> {
+    // [1,2+2, "hello"]
+    const list: Expression[] = [];
+    if (this.isPeekToken(end)) {
+      this.nextToken();
+      return list;
+    }
+    this.nextToken();
+    const tokens = this.parseExpression(Precedence.LOWEST) as Expression;
+    list.push(tokens);
+    while (this.isPeekToken(TokenType.COMMA)) {
+      this.nextToken(); // comma (,)
+      this.nextToken(); // next token
+      const tokens = this.parseExpression(Precedence.LOWEST) as Expression;
+      list.push(tokens);
+    }
+    if (!this.expectPeek(end)) {
+      return null;
+    }
+    return list;
   }
   //  --- registers ---
   registerPrefix(tokenType: TokenType, fn: prefixParseFn) {
