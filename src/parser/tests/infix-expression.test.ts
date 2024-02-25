@@ -1,7 +1,6 @@
 import { ExpressionStatement, InfixExpression, IntegerLiteral } from "ast";
 import { it, expect, describe } from "vitest";
 import { makeSut } from "./sut";
-
 describe("Parser", () => {
   describe("parse program", () => {
     it("infix expression", () => {
