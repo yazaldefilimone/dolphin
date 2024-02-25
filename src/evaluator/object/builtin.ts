@@ -24,10 +24,17 @@ const len: BuiltinFunction = (...args: BaseObject<string>[]) => {
     return new InternalError(`wrong number of arguments. got=${args.length}, want=1`);
   }
   const arg = args[0];
-  if (arg.type() !== EBaseObject.STRING) {
-    return new InternalError(`argument to \`len\` not supported, got ${arg.type()}`);
+  switch (arg.type()) {
+    case EBaseObject.STRING: {
+      return new Integer(arg?.value.length);
+    }
+    case EBaseObject.ARRAY: {
+      return new Integer(arg?.value.length);
+    }
+    default: {
+      return new InternalError(`argument to \`len\` not supported, got ${arg.type()}`);
+    }
   }
-  return new Integer(arg?.value.length);
 };
 
 const keyboardTable = new Map<string, Builtin>();
