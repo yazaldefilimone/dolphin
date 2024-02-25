@@ -22,6 +22,7 @@ describe("Lexer", () => {
     10 != 9;
     "foobar"
     "foo bar"
+    [10, "hello"]
 `;
     const tests = [
       new Token(TokenType.LET, "let"),
@@ -99,6 +100,11 @@ describe("Lexer", () => {
       new Token(TokenType.SEMICOLON, ";"),
       new Token(TokenType.STRING, "foobar"),
       new Token(TokenType.STRING, "foo bar"),
+      new Token(TokenType.LBRACKET, "["),
+      new Token(TokenType.INT, "10"),
+      new Token(TokenType.COMMA, ","),
+      new Token(TokenType.STRING, "hello"),
+      new Token(TokenType.RBRACKET, "]"),
       new Token(TokenType.EOF, ""),
     ];
 
