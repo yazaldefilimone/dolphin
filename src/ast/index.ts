@@ -13,3 +13,5 @@ export * from "./block";
 export * from "./function";
 export * from "./call";
 export * from "./string";
+export * from "./array";
+export * from "./index";
