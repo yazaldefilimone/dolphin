@@ -18,6 +18,10 @@ describe("Evaluator", () => {
           expected: 11,
         },
         {
+          input: `len([0,1,2])`,
+          expected: 3,
+        },
+        {
           input: `len(1)`,
           expected: "argument to `len` not supported, got INTEGER",
         },
