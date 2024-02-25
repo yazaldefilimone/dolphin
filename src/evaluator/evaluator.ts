@@ -42,10 +42,10 @@ import {
   notFunctionError,
   parseTwoObjectToString,
   typeMismatchError,
-  unknownIdentifierError,
   unknownOperatorError,
 } from "./errors";
 import { verifyPermission } from "./permissions";
+import { IndexExpression } from "ast/index-expression";
 
 export function Evaluator(node: Maybe<Node>, env: Environment): Maybe<BaseObject> {
   if (node === null) return internal.NULL;
@@ -121,11 +121,30 @@ export function Evaluator(node: Maybe<Node>, env: Environment): Maybe<BaseObject
       if (elements.length === 1 && isError(elements[0])) return elements[0];
       return new InternalArray(elements as BaseObject[]);
     }
+    case ExpressionKind.INDEX: {
+      const indexNode = node as IndexExpression;
+      const leftExpr = Evaluator(indexNode.left, env);
+      if (isError(leftExpr) || !leftExpr) return leftExpr;
+      const indexExpr = Evaluator(indexNode.index, env);
+      if (isError(indexExpr) || !indexExpr) return indexExpr;
+      return evalIndexExpression(leftExpr, indexExpr);
+    }
     default:
       return identifierNotFoundError(node.tokenLiteral());
   }
 }
-
+function evalIndexExpression(left: BaseObject, index: BaseObject): Maybe<BaseObject> {
+  if (!isExpectObject(left, EBaseObject.ARRAY) || !isExpectObject(index, EBaseObject.INTEGER)) {
+    return unknownOperatorError(`${left.type()}[${index.type()}]`);
+  }
+  const array = left as InternalArray;
+  const i = index as Integer;
+  const max = array.value.length - 1;
+  if (i.value < 0 || i.value > max) {
+    return internal.NULL;
+  }
+  return array.value[i.value];
+}
 function evaluatorStatements(statements: Statement[], env: Environment): Maybe<BaseObject> {
   let result: Maybe<BaseObject> = null;
   for (const statement of statements) {
