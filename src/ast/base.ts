@@ -18,6 +18,7 @@ export enum ExpressionKind {
   IF = "IF",
   FUNCTION = "FUNCTION",
   CALL = "CALL",
+  INDEX = "INDEX",
 }
 
 type nodeKindType = StatementKind | ExpressionKind | ProgramKind;
