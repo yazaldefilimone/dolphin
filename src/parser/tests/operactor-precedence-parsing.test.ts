@@ -24,9 +24,20 @@ describe("Parser", () => {
           input: "3 + 4 * 5 == 3 * 1 + 4 * 5",
           expected: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
         },
+        {
+          input: "a * [1, 2, 3, 4][b * c] * d",
+          expected: "((a * ([1, 2, 3, 4][(b * c)])) * d)",
+        },
+        {
+          input: "add(a * b[2], b[1], 2 * [1, 2][1]);",
+          expected: "add((a * (b[2])),(b[1]),(2 * ([1, 2][1])))",
+        },
       ];
       tests.forEach((tt) => {
-        const { program } = makeSut(tt.input);
+        const { program } = makeSut(tt.input, {
+          isLogError: true,
+          toString: false,
+        });
         expect(program.toString()).toBe(tt.expected);
       });
     });
