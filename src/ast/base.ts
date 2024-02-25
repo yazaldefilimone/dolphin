@@ -10,6 +10,7 @@ export enum StatementKind {
 export enum ExpressionKind {
   IDENTIFIER = "IDENTIFIER",
   INTEGER = "INTEGER",
+  ARRAY = "ARRAY",
   BOOLEAN = "BOOLEAN",
   STRING = "STRING",
   PREFIX = "PREFIX",
