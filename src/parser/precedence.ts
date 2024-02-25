@@ -8,6 +8,7 @@ export enum Precedence {
   PRODUCT, // *
   PREFIX, // -X or !X
   CALL, // myFunction(X)
+  INDEX, // array[index]
 }
 
 type precedenceMapType = Partial<Record<TokenType, Precedence>>;
@@ -21,4 +22,5 @@ export const precedences: precedenceMapType = {
   [TokenType.MINUS]: Precedence.SUM,
   [TokenType.EQ]: Precedence.EQUALS,
   [TokenType.NOT_EQ]: Precedence.EQUALS,
-};
+  [TokenType.LBRACKET]: Precedence.INDEX,
+} as const;
