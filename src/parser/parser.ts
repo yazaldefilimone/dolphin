@@ -23,6 +23,7 @@ import { IntegerLiteral } from "ast/integer-literal";
 import { PrefixExpression } from "ast";
 import { FunctionLiteral } from "ast/function";
 import { ArrayLiteral } from "ast/array";
+import { IndexExpression } from "ast/index-expression";
 
 export class Parser {
   private lexer: Lexer;
@@ -51,6 +52,7 @@ export class Parser {
     this.registerPrefix(TokenType.IF, this.parseIfExpression.bind(this));
     this.registerPrefix(TokenType.STRING, this.parseStringLiteral.bind(this));
     // infix registers
+    this.registerInfix(TokenType.LBRACKET, this.parseIndexExpression.bind(this));
     this.registerInfix(TokenType.PLUS, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.LT, this.parseInfixExpression.bind(this));
     this.registerInfix(TokenType.GT, this.parseInfixExpression.bind(this));
@@ -135,7 +137,6 @@ export class Parser {
       return null;
     }
     let leftExpression = prefix();
-
     while (!this.isPeekToken(this.currentToken.type) && precedence < this.peekPrecedence()) {
       const infix = this.infixParseFns.get(this.peekToken.type);
       if (infix === undefined) {
@@ -182,6 +183,15 @@ export class Parser {
     expression.right = this.parseExpression(precedence);
     return expression;
   }
+  parseIndexExpression(left: Expression): Maybe<Expression> {
+    const indexExpression = new IndexExpression(this.currentToken, left);
+    this.nextToken();
+    indexExpression.index = this.parseExpression(Precedence.LOWEST);
+    if (!this.expectPeek(TokenType.RBRACKET)) {
+      return null;
+    }
+    return indexExpression;
+  }
   parseBoolean(): Maybe<BooleanLiteral> {
     return new BooleanLiteral(this.currentToken, this.isCurrentToken(TokenType.TRUE));
   }
@@ -196,7 +206,7 @@ export class Parser {
   parseArrayLiteral(): Maybe<Expression> {
     const list = this.parseExpressionList(TokenType.RBRACKET);
     const array = new ArrayLiteral(this.currentToken, list);
-    this.nextToken();
+    // this.nextToken();
     return array;
   }
   parseIfExpression(): Maybe<IfExpression> {
@@ -286,12 +296,12 @@ export class Parser {
   parseCallExpression(fn: Expression): Maybe<CallExpression> {
     const expression = new CallExpression(this.currentToken);
     expression.function = fn;
-    expression.arguments = this.parseCallArguments(TokenType.RPAREN);
+    const argsTokens = this.parseCallArguments(TokenType.RPAREN);
+    expression.arguments = argsTokens;
     return expression;
   }
   parseCallArguments(end: TokenType): Maybe<Expression[]> {
     const args: Expression[] = [];
-
     if (this.isPeekToken(end)) {
       this.nextToken();
       return args;
@@ -299,18 +309,13 @@ export class Parser {
 
     this.nextToken();
     const arg = this.parseExpression(Precedence.LOWEST);
-    if (arg) {
-      args.push(arg);
-    }
+    arg && args.push(arg);
     while (this.isPeekToken(TokenType.COMMA)) {
       this.nextToken();
       this.nextToken();
       const arg = this.parseExpression(Precedence.LOWEST);
-      if (arg) {
-        args.push(arg);
-      }
+      arg && args.push(arg);
     }
-
     if (!this.expectPeek(end)) {
       return null;
     }
@@ -326,7 +331,7 @@ export class Parser {
     }
     this.nextToken();
     const tokens = this.parseExpression(Precedence.LOWEST) as Expression;
-    list.push(tokens);
+    tokens && list.push(tokens);
     while (this.isPeekToken(TokenType.COMMA)) {
       this.nextToken(); // comma (,)
       this.nextToken(); // next token
