@@ -18,6 +18,7 @@ import {
   Expression,
   CallExpression,
   StringLiteral,
+  ArrayLiteral,
 } from "ast";
 
 import {
@@ -30,6 +31,9 @@ import {
   Environment,
   EnclosedEnvironment,
   BaseString,
+  BaseFunction,
+  Builtin,
+  InternalArray,
 } from "evaluator/object";
 
 import { Maybe } from "utils";
@@ -38,59 +42,70 @@ import {
   notFunctionError,
   parseTwoObjectToString,
   typeMismatchError,
-  unknownIdentifierError,
   unknownOperatorError,
 } from "./errors";
 import { verifyPermission } from "./permissions";
-import { BaseFunction } from "./object/function";
-import { Builtin } from "./object/builtin";
+import { IndexExpression } from "ast/index-expression";
 
 export function Evaluator(node: Maybe<Node>, env: Environment): Maybe<BaseObject> {
   if (node === null) return internal.NULL;
   switch (node.kind) {
-    case ProgramKind.program:
+    case ProgramKind.program: {
       return evalProgram(node as Program, env);
-    case StatementKind.BLOCK:
+    }
+    case StatementKind.BLOCK: {
       return evalProgram(node as Program, env);
-    case StatementKind.EXPRESSION:
+    }
+    case StatementKind.EXPRESSION: {
       return Evaluator((node as ExpressionStatement).expression, env);
-    case ExpressionKind.INTEGER:
+    }
+    case ExpressionKind.INTEGER: {
       return new Integer((node as IntegerLiteral).value);
-    case ExpressionKind.STRING:
+    }
+    case ExpressionKind.STRING: {
       return new BaseString((node as StringLiteral).value);
-    case ExpressionKind.BOOLEAN:
+    }
+    case ExpressionKind.BOOLEAN: {
       return nativeBooleanObject((node as BooleanLiteral).value);
-    case ExpressionKind.PREFIX:
+    }
+    case ExpressionKind.PREFIX: {
       const prefixNode = node as PrefixExpression;
       const prefixRight = Evaluator(prefixNode.right, env);
       if (prefixRight === null) return internal.NULL;
       if (isExpectObject(prefixRight, EBaseObject.ERROR)) return prefixRight;
       return evalPrefixExpression(prefixNode.operator, prefixRight);
-    case ExpressionKind.INFIX:
+    }
+    case ExpressionKind.INFIX: {
       const infix = node as InfixExpression;
       const infixLeft = Evaluator(infix.left, env);
       const infixRight = Evaluator(infix.right, env);
       return evalInfixExpression(infixLeft, infixRight, infix.operator);
-    case ExpressionKind.IF:
+    }
+    case ExpressionKind.IF: {
       const ifNode = node as IfExpression;
       return evalIfExpression(ifNode, env);
-    case StatementKind.RETURN:
+    }
+    case StatementKind.RETURN: {
       const rNode = node as ReturnStatement;
       const returnValue = Evaluator(rNode.returnValue, env);
       if (returnValue === null) return internal.NULL;
       return new ReturnObject(returnValue);
-    case StatementKind.LET:
+    }
+    case StatementKind.LET: {
       const letNode = node as LetStatement;
       const exp = Evaluator(letNode.value, env);
       if (isError(exp)) return exp;
       env.setStore(letNode.name.value, exp as BaseObject);
       return null;
-    case ExpressionKind.IDENTIFIER:
+    }
+    case ExpressionKind.IDENTIFIER: {
       const identOrError = evalIdentifierExpression(node as Identifier, env);
       return identOrError;
-    case ExpressionKind.FUNCTION:
+    }
+    case ExpressionKind.FUNCTION: {
       return evalFunctionExpression(node as FunctionLiteral, env);
-    case ExpressionKind.CALL:
+    }
+    case ExpressionKind.CALL: {
       const callNode = node as CallExpression;
       const func = Evaluator(callNode.function, env);
       if (isError(func)) return func;
@@ -98,11 +113,38 @@ export function Evaluator(node: Maybe<Node>, env: Environment): Maybe<BaseObject
       if (args.length === 1 && isError(args[0])) return args[0];
       if (args === null || func == null) return internal.NULL;
       return applyFunction(func, args as BaseObject[]);
+    }
+    case ExpressionKind.ARRAY: {
+      const arrayNode = node as ArrayLiteral;
+      const elements = evalExpressions(arrayNode.elements, env);
+      if (!elements) return internal.NULL;
+      if (elements.length === 1 && isError(elements[0])) return elements[0];
+      return new InternalArray(elements as BaseObject[]);
+    }
+    case ExpressionKind.INDEX: {
+      const indexNode = node as IndexExpression;
+      const leftExpr = Evaluator(indexNode.left, env);
+      if (isError(leftExpr) || !leftExpr) return leftExpr;
+      const indexExpr = Evaluator(indexNode.index, env);
+      if (isError(indexExpr) || !indexExpr) return indexExpr;
+      return evalIndexExpression(leftExpr, indexExpr);
+    }
     default:
       return identifierNotFoundError(node.tokenLiteral());
   }
 }
-
+function evalIndexExpression(left: BaseObject, index: BaseObject): Maybe<BaseObject> {
+  if (!isExpectObject(left, EBaseObject.ARRAY) || !isExpectObject(index, EBaseObject.INTEGER)) {
+    return unknownOperatorError(`${left.type()}[${index.type()}]`);
+  }
+  const array = left as InternalArray;
+  const i = index as Integer;
+  const max = array.value.length - 1;
+  if (i.value < 0 || i.value > max) {
+    return internal.NULL;
+  }
+  return array.value[i.value];
+}
 function evaluatorStatements(statements: Statement[], env: Environment): Maybe<BaseObject> {
   let result: Maybe<BaseObject> = null;
   for (const statement of statements) {

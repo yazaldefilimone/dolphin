@@ -10,6 +10,7 @@ export enum StatementKind {
 export enum ExpressionKind {
   IDENTIFIER = "IDENTIFIER",
   INTEGER = "INTEGER",
+  ARRAY = "ARRAY",
   BOOLEAN = "BOOLEAN",
   STRING = "STRING",
   PREFIX = "PREFIX",
@@ -17,6 +18,7 @@ export enum ExpressionKind {
   IF = "IF",
   FUNCTION = "FUNCTION",
   CALL = "CALL",
+  INDEX = "INDEX",
 }
 
 type nodeKindType = StatementKind | ExpressionKind | ProgramKind;

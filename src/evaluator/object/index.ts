@@ -7,3 +7,6 @@ export * from "./string";
 export * from "./error";
 export * from "./internal";
 export * from "./environment";
+export * from "./function";
+export * from "./builtin";
+export * from "./array";

@@ -7,6 +7,7 @@ export enum EBaseObject {
   ERROR = "ERROR",
   FUNCTION = "FUNCTION",
   BUILTIN = "BUILTIN",
+  ARRAY = "ARRAY",
 }
 export interface BaseObject<T = unknown> {
   type(): EBaseObject;

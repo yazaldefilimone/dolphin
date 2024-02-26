@@ -9,14 +9,14 @@ function debugPrintError(errors: ErrorHandler) {
 
 function debugPrintErrorInString(errors: ErrorHandler) {
   // remove comments if you want debug
-  // errors.getErrorsInString().map((message) => {
-  //   const error = "Error: " + message.concat("\n");
-  //   console.log("\x1b[31m%s\x1b[0m", error);
-  // });
+  errors.getErrorsInString().map((message) => {
+    const error = "Error: " + message.concat("\n");
+    console.log("\x1b[31m%s\x1b[0m", error);
+  });
 }
 function debugToString(program: Program) {
   // remove comments if you want debug
-  // console.log(program.toString().concat("\n"));
+  console.log(program.toString().concat("\n"));
 }
 type debugType = {
   isLogError?: boolean;

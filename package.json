@@ -10,6 +10,7 @@
     "test:lexer": "vitest ./lexer",
     "test": "vitest ",
     "dev": "tsx  ./src/index.ts",
+    "dev:bun": "bun   ./src/index.ts",
     "lint:fix": "tslint --fix --project ./tsconfig.json"
   },
   "devDependencies": {
